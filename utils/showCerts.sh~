@@ -1,0 +1,5 @@
+#!/bin/bash
+# This script is for displaying the content of a certificate, including .pem, .crt files
+OPENSSL=/usr/bin/openssl
+
+$OPENSSL x509 -in $@ -text
