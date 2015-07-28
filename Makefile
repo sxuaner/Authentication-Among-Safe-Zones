@@ -11,6 +11,8 @@ KEYLEN=2048
 TYPE=rsa:$(KEYLEN)
 OPENSSL=/usr/bin/openssl
 
+ROOTCA=./rootca
+
 ####### Help #########
 help:
 	@echo "This makefile allows you to create:"
@@ -23,9 +25,9 @@ help:
 	@echo "To create a test certificate, run \"make SOMETHING.crt\"."
 	@echo "To create a key and a test certificate in one file, run \"make SOMETHING.pem\"."
 	@echo
-	# @echo "To create a key for use with Apache, run \"make genkey\"."
-	# @echo "To create a CSR for use with Apache, run \"make certreq\"."
-	# @echo "To createn a test certificate for use with Apache, run \"make testcert\"."
+# @echo "To create a key for use with Apache, run \"make genkey\"."
+# @echo "To create a CSR for use with Apache, run \"make certreq\"."
+# @echo "To createn a test certificate for use with Apache, run \"make testcert\"."
 	@echo
 	@echo "To create a test certificate with serial number other than zero, add SERIAL=num"
 	@echo "You can also specify key length with KEYLEN=n and expiration in days with DAYS=n"
@@ -59,7 +61,7 @@ all:
 	cat $$PEM1 >  $@ ; \
 	echo ""    >> $@ ; \
 	cat $$PEM2 >> $@ ; \
-# 	rm $$PEM1 $$PEM2
+	$(RM) $$PEM1 $$PEM2
 
 %.key:
 	umask 77 ; \
@@ -77,17 +79,17 @@ all:
 # certreq: $(CSR)
 # testcert: $(CRT)
 
-$(CSR): $(KEY)
-	umask 77 ; \
-	/usr/bin/openssl req $(UTF8) -new -key $(KEY) -out $(CSR)
+# $(CSR): $(KEY)
+# 	umask 77 ; \
+# 	/usr/bin/openssl req $(UTF8) -new -key $(KEY) -out $(CSR)
 
-$(CRT): $(KEY)
-	umask 77 ; \
-	/usr/bin/openssl req $(UTF8) -new -key $(KEY) -x509 -days $(DAYS) -out $(CRT) -set_serial $(SERIAL)
+# $(CRT): $(KEY)
+# 	umask 77 ; \
+# 	/usr/bin/openssl req $(UTF8) -new -key $(KEY) -x509 -days $(DAYS) -out $(CRT) -set_serial $(SERIAL)
 
 ####### Targets.display #########
 show:
-	$(OPENSSL) x509 -in my-ca.crt -text -noout
+	$(OPENSSL) x509 -in $2 -text -noout
 
 
 ####### Targets.clean #########
