@@ -13,6 +13,7 @@ OPENSSL=/usr/bin/openssl
 
 ROOTCA=./rootca
 
+
 ####### Help #########
 help:
 	@echo "This makefile allows you to create:"
@@ -45,11 +46,14 @@ help:
 	@echo "  make testcert SERIAL=3"
 
 
-####### Targets #########
-
+####### Targets.all #########
+# This part generates all needed certificates once in all for us.
+# Input to terminal:
+# 	make all
 all:
 	@echo $@
 	@echo " A set of certificates will be made!"
+
 
 ####### Targets.create #########
 
@@ -74,13 +78,6 @@ all:
 %.crt: %.key
 	umask 77 ; \
 	$(OPENSSL) req $(UTF8) -new -key $^ -x509 -days $(DAYS) -out $@ -set_serial $(SERIAL)
-
-
-
-####### Targets.display #########
-show:
-	$(OPENSSL) x509 -in $2 -text -noout
-
 
 ####### Targets.clean #########
 clean:
