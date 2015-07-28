@@ -10,8 +10,9 @@ DAYS=365
 KEYLEN=2048
 TYPE=rsa:$(KEYLEN)
 OPENSSL=/usr/bin/openssl
+CONFIG=./config
+ROOTCA=./root-ca
 
-ROOTCA=./rootca
 
 
 ####### Help #########
@@ -57,6 +58,27 @@ all:
 
 ####### Targets.create #########
 
+rootdb:
+	mkdir -p $(ROOTCA)/db/;\
+	cp /dev/null $(ROOTCA)/db/root-ca.db;\
+	cp /dev/null $(ROOTCA)/db/root-ca.db.attr;\
+	echo 01 > $(ROOTCA)/db/root-ca.crt.srl;\
+	echo 01 > $(ROOTCA)/db/root-ca.crl.srl
+
+rootcacsr:
+	umask 77; \
+	$(OPENSSL) req -new \
+	-config $(CONFIG)/root-ca.conf \
+	-out $(ROOTCA)/root-ca.csr \
+	-keyout $(ROOTCA)/root-ca.key
+
+rootca: rootdb rootcacsr
+	$(OPENSSL) ca -selfsign \
+	-config $(CONFIG)/root-ca.conf \
+	-in $(ROOTCA)/root-ca.csr \
+	-out $(ROOTCA)/root-ca.crt \
+	-extensions root_ca_ext
+
 %.pem:
 	umask 77 ; \
 	PEM1=`/bin/mktemp /tmp/openssl.XXXXXX` ; \
@@ -71,7 +93,7 @@ all:
 	umask 77 ; \
 	$(OPENSSL) genrsa -aes128 $(KEYLEN) > $@
 
-%.csr: %.key
+%.csr: %.key 
 	umask 77 ; \
 	$(OPENSSL) req $(UTF8) -new -key $^ -out $@
 
