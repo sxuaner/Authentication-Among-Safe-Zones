@@ -79,10 +79,6 @@ all:
 	umask 77 ; \
 	$(OPENSSL) req $(UTF8) -new -key $^ -x509 -days $(DAYS) -out $@ -set_serial $(SERIAL)
 
-####### Targets.clean #########
-clean:
-	@echo "Nothing to clean yet!"
-
 
 ####### Targets.Apache #########
 # genkey: $(KEY)
