@@ -73,9 +73,9 @@ all:
 	umask 77 ; \
 	$(OPENSSL) req $(UTF8) -new -key $^ -x509 -days $(DAYS) -out $@ -set_serial $(SERIAL)
 
-genkey: $(KEY)
-certreq: $(CSR)
-testcert: $(CRT)
+# genkey: $(KEY)
+# certreq: $(CSR)
+# testcert: $(CRT)
 
 $(CSR): $(KEY)
 	umask 77 ; \
