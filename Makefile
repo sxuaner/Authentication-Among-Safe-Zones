@@ -75,6 +75,19 @@ all:
 	umask 77 ; \
 	$(OPENSSL) req $(UTF8) -new -key $^ -x509 -days $(DAYS) -out $@ -set_serial $(SERIAL)
 
+
+
+####### Targets.display #########
+show:
+	$(OPENSSL) x509 -in $2 -text -noout
+
+
+####### Targets.clean #########
+clean:
+	@echo "Nothing to clean yet!"
+
+
+####### Targets.Apache #########
 # genkey: $(KEY)
 # certreq: $(CSR)
 # testcert: $(CRT)
@@ -86,13 +99,3 @@ all:
 # $(CRT): $(KEY)
 # 	umask 77 ; \
 # 	/usr/bin/openssl req $(UTF8) -new -key $(KEY) -x509 -days $(DAYS) -out $(CRT) -set_serial $(SERIAL)
-
-####### Targets.display #########
-show:
-	$(OPENSSL) x509 -in $2 -text -noout
-
-
-####### Targets.clean #########
-clean:
-	@echo "Nothing to clean yet!"
-
