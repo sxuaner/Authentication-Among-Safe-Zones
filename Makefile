@@ -9,10 +9,12 @@ SERIAL=0
 DAYS=365
 KEYLEN=2048
 TYPE=rsa:$(KEYLEN)
+
 OPENSSL=/usr/bin/openssl
 CONFIG=./config
 ROOTCA=./root-ca
 SIGNINGCA=./signing-ca
+CRL=./crl
 
 
 
@@ -87,7 +89,7 @@ rootca: rootdb rootcacsr
 ####### Targets.signning ca #########
 # Signing CA uses root cert to sign its cert
 signingcadb:
-	mkdir -p $(SIGNINGCA)/private signing-ca/db crl certs;\
+	mkdir -p $(SIGNINGCA)/private $(SIGNING-CA)/db crl certs;\
 	chmod 700 $(SIGNINGCA)/private
 	cp /dev/null $(SIGNINGCA)/db/signing-ca.db
 	cp /dev/null $(SIGNINGCA)/db/signing-ca.db.attr
@@ -114,40 +116,12 @@ signingca: signingcadb signingcareq
 
 
 
-# ####### Targets. #########
-
-# %.pem:
-# 	umask 77 ; \
-# 	PEM1=`/bin/mktemp /tmp/openssl.XXXXXX` ; \
-# 	PEM2=`/bin/mktemp /tmp/openssl.XXXXXX` ; \
-# 	$(OPENSSL) req $(UTF8) -newkey $(TYPE) -keyout $$PEM1 -nodes -x509 -days $(DAYS) -out $$PEM2 -set_serial $(SERIAL) ; \
-# 	cat $$PEM1 >  $@ ; \
-# 	echo ""    >> $@ ; \
-# 	cat $$PEM2 >> $@ ; \
-# 	$(RM) $$PEM1 $$PEM2
-
-# %.key:
-# 	umask 77 ; \
-# 	$(OPENSSL) genrsa -aes128 $(KEYLEN) > $@
-
-# %.csr: %.key 
-# 	umask 77 ; \
-# 	$(OPENSSL) req $(UTF8) -new -key $^ -out $@
-
-# %.crt: %.key
-# 	umask 77 ; \
-# 	$(OPENSSL) req $(UTF8) -new -key $^ -x509 -days $(DAYS) -out $@ -set_serial $(SERIAL)
+######## Targets.clients #########
 
 
-# ####### Targets.Apache #########
-# # genkey: $(KEY)
-# # certreq: $(CSR)
-# # testcert: $(CRT)
-
-# # $(CSR): $(KEY)
-# # 	umask 77 ; \
-# # 	/usr/bin/openssl req $(UTF8) -new -key $(KEY) -out $(CSR)
-
-# # $(CRT): $(KEY)
-# # 	umask 77 ; \
-# # 	/usr/bin/openssl req $(UTF8) -new -key $(KEY) -x509 -days $(DAYS) -out $(CRT) -set_serial $(SERIAL)
+######## Targets.crl #########
+crl:
+	mkdir -p $(CRL)
+	openssl ca -gencrl \
+	-config $(CONFIG)/signing-ca.conf \
+	-out $(CRL)/signing-ca.crl
