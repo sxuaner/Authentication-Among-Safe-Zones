@@ -12,6 +12,7 @@ TYPE=rsa:$(KEYLEN)
 OPENSSL=/usr/bin/openssl
 CONFIG=./config
 ROOTCA=./root-ca
+SIGNINGCA=./signing-ca
 
 
 
@@ -56,14 +57,14 @@ all:
 	@echo " A set of certificates will be made!"
 
 
-####### Targets.create #########
+####### Targets.rootca #########
 
 rootdb:
-	unmask 77;
+	umask 77;
 # In case db folder didn't exist.
 	mkdir -p $(ROOTCA)/db/;\
 # Change the mod to 700, so that except for the owner, no one else could see.
-	chmod 700 ca/root-ca/private;\
+	chmod 700  $(ROOTCA)/private;\
 	cp /dev/null $(ROOTCA)/db/root-ca.db;\
 	cp /dev/null $(ROOTCA)/db/root-ca.db.attr;\
 	echo 01 > $(ROOTCA)/db/root-ca.crt.srl;\
@@ -83,38 +84,70 @@ rootca: rootdb rootcacsr
 	-out $(ROOTCA)/root-ca.crt \
 	-extensions root_ca_ext
 
-%.pem:
-	umask 77 ; \
-	PEM1=`/bin/mktemp /tmp/openssl.XXXXXX` ; \
-	PEM2=`/bin/mktemp /tmp/openssl.XXXXXX` ; \
-	$(OPENSSL) req $(UTF8) -newkey $(TYPE) -keyout $$PEM1 -nodes -x509 -days $(DAYS) -out $$PEM2 -set_serial $(SERIAL) ; \
-	cat $$PEM1 >  $@ ; \
-	echo ""    >> $@ ; \
-	cat $$PEM2 >> $@ ; \
-	$(RM) $$PEM1 $$PEM2
+####### Targets.signning ca #########
+# Signing CA uses root cert to sign its cert
+signingcadb:
+	mkdir -p $(SIGNINGCA)/private signing-ca/db crl certs;\
+	chmod 700 $(SIGNINGCA)/private
+	cp /dev/null $(SIGNINGCA)/db/signing-ca.db
+	cp /dev/null $(SIGNINGCA)/db/signing-ca.db.attr
+	echo 01 > $(SIGNINGCA)/db/signing-ca.crt.srl
+	echo 01 > $(SIGNINGCA)/db/signing-ca.crl.srl	
 
-%.key:
-	umask 77 ; \
-	$(OPENSSL) genrsa -aes128 $(KEYLEN) > $@
+signingcareq: 
+	openssl req -new \
+        -config $(CONFIG)/signing-ca.conf \
+	-out $(SIGNINGCA)/signing-ca.csr \
+	-keyout $(SIGNINGCA)/private/signing-ca.key
 
-%.csr: %.key 
-	umask 77 ; \
-	$(OPENSSL) req $(UTF8) -new -key $^ -out $@
+# Has to use root-ca config here to make the cert?? why?
+# Notice while making the signing ca:
+# Check that the request matches the signature
+# Signature ok
 
-%.crt: %.key
-	umask 77 ; \
-	$(OPENSSL) req $(UTF8) -new -key $^ -x509 -days $(DAYS) -out $@ -set_serial $(SERIAL)
+signingca: signingcadb signingcareq
+	openssl ca \
+	-config $(CONFIG)/root-ca.conf \
+	-in $(SIGNINGCA)/signing-ca.csr \
+	-out $(SIGNINGCA)/signing-ca.crt \
+	-extensions signing_ca_ext
 
 
-####### Targets.Apache #########
-# genkey: $(KEY)
-# certreq: $(CSR)
-# testcert: $(CRT)
 
-# $(CSR): $(KEY)
+# ####### Targets. #########
+
+# %.pem:
 # 	umask 77 ; \
-# 	/usr/bin/openssl req $(UTF8) -new -key $(KEY) -out $(CSR)
+# 	PEM1=`/bin/mktemp /tmp/openssl.XXXXXX` ; \
+# 	PEM2=`/bin/mktemp /tmp/openssl.XXXXXX` ; \
+# 	$(OPENSSL) req $(UTF8) -newkey $(TYPE) -keyout $$PEM1 -nodes -x509 -days $(DAYS) -out $$PEM2 -set_serial $(SERIAL) ; \
+# 	cat $$PEM1 >  $@ ; \
+# 	echo ""    >> $@ ; \
+# 	cat $$PEM2 >> $@ ; \
+# 	$(RM) $$PEM1 $$PEM2
 
-# $(CRT): $(KEY)
+# %.key:
 # 	umask 77 ; \
-# 	/usr/bin/openssl req $(UTF8) -new -key $(KEY) -x509 -days $(DAYS) -out $(CRT) -set_serial $(SERIAL)
+# 	$(OPENSSL) genrsa -aes128 $(KEYLEN) > $@
+
+# %.csr: %.key 
+# 	umask 77 ; \
+# 	$(OPENSSL) req $(UTF8) -new -key $^ -out $@
+
+# %.crt: %.key
+# 	umask 77 ; \
+# 	$(OPENSSL) req $(UTF8) -new -key $^ -x509 -days $(DAYS) -out $@ -set_serial $(SERIAL)
+
+
+# ####### Targets.Apache #########
+# # genkey: $(KEY)
+# # certreq: $(CSR)
+# # testcert: $(CRT)
+
+# # $(CSR): $(KEY)
+# # 	umask 77 ; \
+# # 	/usr/bin/openssl req $(UTF8) -new -key $(KEY) -out $(CSR)
+
+# # $(CRT): $(KEY)
+# # 	umask 77 ; \
+# # 	/usr/bin/openssl req $(UTF8) -new -key $(KEY) -x509 -days $(DAYS) -out $(CRT) -set_serial $(SERIAL)
