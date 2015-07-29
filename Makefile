@@ -59,6 +59,7 @@ all:
 ####### Targets.create #########
 
 rootdb:
+	unmask 77;
 # In case db folder didn't exist.
 	mkdir -p $(ROOTCA)/db/;\
 # Change the mod to 700, so that except for the owner, no one else could see.
