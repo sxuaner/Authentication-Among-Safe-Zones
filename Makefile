@@ -59,7 +59,10 @@ all:
 ####### Targets.create #########
 
 rootdb:
+# In case db folder didn't exist.
 	mkdir -p $(ROOTCA)/db/;\
+# Change the mod to 700, so that except for the owner, no one else could see.
+	chmod 700 ca/root-ca/private;\
 	cp /dev/null $(ROOTCA)/db/root-ca.db;\
 	cp /dev/null $(ROOTCA)/db/root-ca.db.attr;\
 	echo 01 > $(ROOTCA)/db/root-ca.crt.srl;\
