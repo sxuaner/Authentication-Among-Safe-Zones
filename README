@@ -5,3 +5,10 @@
 3. openssl verify -CAfile root-ca.crt fileToVerify
 
 4. Pygobject
+
+
+
+
+5.
+
+########## Question ##########
