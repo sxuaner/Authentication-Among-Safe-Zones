@@ -3,6 +3,7 @@
 
 from gi.repository import Gtk
 import subprocess
+import os.path
 
 class ourwindow(Gtk.Window):
 
@@ -12,7 +13,7 @@ class ourwindow(Gtk.Window):
         self.set_border_width(10)
 
         # Init a gtk box
-        self.box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL,spacing=0)
+        self.box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL,spacing=5)
         self.add(self.box)
         # List for storing the entry objects
         self.entries = []
@@ -52,10 +53,10 @@ class ourwindow(Gtk.Window):
         hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL,spacing= 1)
         vbox.pack_start(hbox, True, True, 0)
         
-        button = Gtk.Button("Key Pair")
-        button.connect("clicked", self.on_click_keybutton_clicked)
+        button = Gtk.Button("Key Store")
+        button.connect("clicked", self.on_click_keystore_clicked)
         hbox.pack_start(button, True, True, 0)
-   
+
         button = Gtk.Button("Request")
         button.connect("clicked", self.on_click_reqbutton_clicked)
         hbox.pack_start(button, True, True, 0)
@@ -63,15 +64,21 @@ class ourwindow(Gtk.Window):
         # Hbox for show cert button
         hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL,spacing= 1)
         vbox.pack_start(hbox, True, True, 0)
-        
+
         button = Gtk.Button("Show Cert")
-        button.connect("clicked", self.on_click_reqbutton_clicked)
+        button.connect("clicked", self.on_click_show_clicked)
         hbox.pack_start(button, True, True, 0)
 
         hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL,spacing= 1)
         vbox.pack_start(hbox, True, True, 0)
 
+        button = Gtk.Button("Select Ca")
+        button.connect("clicked", self.on_file_clicked)
+        hbox.pack_start(button, True, True, 0)
+        
+        # To update and display the input values:
     def updateEntries(self):
+
         print "\n\n ------------ "
         for entry, name in zip(self.entries, self.names):
             tmp = entry.get_text()
@@ -82,17 +89,106 @@ class ourwindow(Gtk.Window):
                 print name, " Empty value "
         print " ------------ \n\n "
 
-        #  on_click event part
-    def on_click_keybutton_clicked(self, button):
+    def on_click_keystore_clicked(self, button):
         # Update the info put in field
         self.updateEntries()
-        par = ["/bin/keytool", "-alias", str( self.info["Alias"]), "-dname",  str("CN=" + self.info["Common Name"]), "-genkeypair", "-keystore", "../keystore"]
-        subprocess.Popen(par)
-        
+
+        # @par -alias: specify the alias name of the key pair
+        # @par -dname :
+        # @par -genkeypari: Generates a key pair (a public key and associated private key).
+        # @par -keystore: tell keytool where to place the keystore file:
+        #                 in top level of the project folder
+        # @par -keysize: the length of the key.
+
+        # If key size is not told. Use default 2058
+        if not self.info["Key Size"]:
+            self.info["Key Size"]= 2048
+
+        if not os.path.exists("../keystore"):
+            if self.info["Common Name"]:
+                if self.info["Alias"]:
+                    par = ["/bin/keytool",
+                           "-genkeypair",
+                           "-alias", str( self.info["Alias"]),
+                           "-dname", str("CN=" + self.info["Common Name"]),
+                           "-keystore", "../keystore",
+                           "-keysize", str(self.info["Key Size"])
+                    ]
+                    subprocess.Popen(par)
+                else:
+                    print "Alias is not provided"
+            else:
+                print "Common Name is not provided"
+
     def on_click_reqbutton_clicked(self, button):
         self.updateEntries()
-        par = ["/bin/keytool", ""]
-                
+
+        par = ["/bin/keytool",
+               "-certreq",
+               "-alias",
+               str( self.info["Alias"]),
+               "-file", str( self.info["Alias"]+".pem")
+        ]
+        subprocess.Popen(par)
+
+    def on_click_show_clicked(self,button):
+        self.updateEntries()
+
+        par = ["/bin/keytool",
+               "-list",
+               "-keystore",
+               "../keystore"
+        ]
+        subprocess.Popen(par)
+
+
+    def on_file_clicked(self, widget):
+        dialog = Gtk.FileChooserDialog("Please choose a file", self,
+                                       Gtk.FileChooserAction.OPEN,
+                                       (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                                        Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
+        self.add_filters(dialog)
+
+        response = dialog.run()
+        if response == Gtk.ResponseType.OK:
+            print("Open clicked")
+            print("File selected: " + dialog.get_filename())
+        elif response == Gtk.ResponseType.CANCEL:
+            print("Cancel clicked")
+
+        dialog.destroy()
+
+    def add_filters(self, dialog):
+        filter_text = Gtk.FileFilter()
+        filter_text.set_name("Text files")
+        filter_text.add_mime_type("text/plain")
+        dialog.add_filter(filter_text)
+
+        filter_py = Gtk.FileFilter()
+        filter_py.set_name("Python files")
+        filter_py.add_mime_type("text/x-python")
+        dialog.add_filter(filter_py)
+
+        filter_any = Gtk.FileFilter()
+        filter_any.set_name("Any files")
+        filter_any.add_pattern("*")
+        dialog.add_filter(filter_any)
+
+    def on_folder_clicked(self, widget):
+        dialog = Gtk.FileChooserDialog("Please choose a folder", self,
+            Gtk.FileChooserAction.SELECT_FOLDER,
+            (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+             "Select", Gtk.ResponseType.OK))
+        dialog.set_default_size(800, 400)
+
+        response = dialog.run()
+        if response == Gtk.ResponseType.OK:
+            print("Select clicked")
+            print("Folder selected: " + dialog.get_filename())
+        elif response == Gtk.ResponseType.CANCEL:
+            print("Cancel clicked")
+
+        dialog.destroy()
         
     
 if __name__ == "__main__":
@@ -103,7 +199,7 @@ if __name__ == "__main__":
     window.createFields("Key Size")
     window.createFields("Validity")
     window.createFields("Domain")
-    window.createFields("Country")
+    window.createFields("Country Code")
     window.createFields("Email")
     
 
