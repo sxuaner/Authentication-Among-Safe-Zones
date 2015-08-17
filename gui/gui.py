@@ -12,8 +12,8 @@ class ourwindow(Gtk.Window):
         Gtk.Window.__init__(self, title="Client Certificate Generator")
         self.set_border_width(10)
 
-        # Init a gtk box
-        self.box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL,spacing=5)
+        # Init a gtk box, spacing controls how far each components stays from each other
+        self.box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
         self.add(self.box)
         # List for storing the entry objects
         self.entries = []
@@ -30,9 +30,8 @@ class ourwindow(Gtk.Window):
             name: The name used for label to indicate what this entry's content.
         
         """
-        # Init a horizontal box
-        hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=50)
-        self.box.pack_start(hbox, True, True, 0)
+        # Init a horizontal box, hbox is short for horizental box.
+        hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=80)
 
         # Pack a label and an entry. The label has char with 15 for aligning lines
         label = Gtk.Label(name, width_chars = 15 )
@@ -44,33 +43,44 @@ class ourwindow(Gtk.Window):
         self.entries.append(entry)
         self.names.append(name)
         self.info[name] = entry.get_text()
+        return hbox
 
+
+    def packHboxToVbox(self, vbox, name):
+        """
+        This func packs a hbox whose name is specified by arg "name" into vbox
+
+        Args:
+            vbox: the vertical box that we want to contain horizental boxes"
+            name: par for hbox
+        """
+        hbox = self.createFields(name)  # Create all necessary fields
+        vbox.pack_start(hbox, True, True, 0)
+        
     def layout(self):
         """
         The overall layout control func
         """
-        self.createFields("Alias")  # Create all necessary fields
-        self.createFields("Common Name")
-        self.createFields("Store Pass")
-        self.createFields("Key Size")
-        self.createFields("Validity")
-        self.createFields("Domain")
-        self.createFields("Country Code")
-        self.createFields("Email")
-        self.createFields("Key Pass")
-        self.createFields("CA's Path")
+        # The spacing arg controls how far the fieds are from each other.
+        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        label = Gtk.Label("123", width_chars = 15 )
 
-        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL,spacing= 1)
-        self.box.pack_start(vbox, True, True, 0)
+        hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        hbox.pack_start(vbox, True, True, 0)
+        hbox.pack_start(label, True, True, 0)
+        
+        self.box.pack_start(hbox, True, True, 0)
 
-            
-    def createButtons(self):
-        """
-        Func to create all needed buttons. SHould be optimized.
-        """
-        # Create a vertical box
-        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL,spacing= 1)
-        self.box.pack_start(vbox, True, True, 0)
+        # Create all necessary fields, and pack into a vertical box.
+        self.packHboxToVbox(vbox, "Common Name")
+        self.packHboxToVbox(vbox, "Store Pass")
+        self.packHboxToVbox(vbox, "Key Size")
+        self.packHboxToVbox(vbox, "Validity")
+        self.packHboxToVbox(vbox, "Domain")
+        self.packHboxToVbox(vbox, "Country Code")
+        self.packHboxToVbox(vbox, "Email")
+        self.packHboxToVbox(vbox, "Key Pass")
+        self.packHboxToVbox(vbox, "CA's Path")
 
         # Add the folloing buttons to vbox
         button = Gtk.Button("Key Store")
@@ -96,6 +106,39 @@ class ourwindow(Gtk.Window):
         button = Gtk.Button("Five Requests")
         button.connect("clicked", self.on_click_fivereqbutton_clicked)
         hbox.pack_start(button, True, True, 0)
+
+    # def createButtons(self):
+    #     """
+    #     Func to create all needed buttons. SHould be optimized.
+    #     """
+    #     # Create a vertical box
+    #     vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL,spacing= 1)
+    #     self.box.pack_start(vbox, True, True, 0)
+
+    #     # Add the folloing buttons to vbox
+    #     button = Gtk.Button("Key Store")
+    #     button.connect("clicked", self.on_click_keystore_clicked)
+    #     vbox.pack_start(button, True, True, 0)
+
+    #     button = Gtk.Button("Show Cert")
+    #     button.connect("clicked", self.on_click_show_clicked)
+    #     vbox.pack_start(button, True, True, 0)
+
+    #     button = Gtk.Button("Select Ca")
+    #     button.connect("clicked", self.on_file_clicked)
+    #     vbox.pack_start(button, True, True, 0)
+
+    #     # We want to Put " a request" and " five requests" on the same row, so a hbox is used
+    #     hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL,spacing= 1)
+    #     vbox.pack_start(hbox, True, True, 0)
+        
+    #     button = Gtk.Button("A Request")
+    #     button.connect("clicked", self.on_click_reqbutton_clicked)
+    #     hbox.pack_start(button, True, True, 0)
+
+    #     button = Gtk.Button("Five Requests")
+    #     button.connect("clicked", self.on_click_fivereqbutton_clicked)
+    #     hbox.pack_start(button, True, True, 0)
         
 
     def updateEntries(self):
@@ -261,7 +304,6 @@ class ourwindow(Gtk.Window):
 if __name__ == "__main__":
     window = ourwindow()
     window.layout()
-    window.createButtons()
     window.connect("delete-event", Gtk.main_quit)
     window.show_all()
     Gtk.main()
