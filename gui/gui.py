@@ -22,25 +22,19 @@ class ourwindow(Gtk.Window):
         # list for storing names of users
         self.names = []
 
-    def layout(self):
-            self.createFields("Alias")  # Create all necessary fields
-            self.createFields("Common Name")
-            self.createFields("Store Pass")
-            self.createFields("Key Size")
-            self.createFields("Validity")
-            self.createFields("Domain")
-            self.createFields("Country Code")
-            self.createFields("Email")
-            self.createFields("Key Pass")
-            self.createFields("CA's Path")
-
     def createFields(self, name):
+        """
+        This method create an entry for inputing data needed for generating certs.
 
+        Args:
+            name: The name used for label to indicate what this entry's content.
+        
+        """
         # Init a horizontal box
         hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=50)
         self.box.pack_start(hbox, True, True, 0)
 
-        # Pack a label and an entry
+        # Pack a label and an entry. The label has char with 15 for aligning lines
         label = Gtk.Label(name, width_chars = 15 )
         entry = Gtk.Entry()
         hbox.pack_start(label, True, True, 0)
@@ -50,38 +44,48 @@ class ourwindow(Gtk.Window):
         self.entries.append(entry)
         self.names.append(name)
         self.info[name] = entry.get_text()
-        
-    def createButton(self):
-        # A warning when some fields are empty should be made.
+
+    def layout(self):
+        """
+        The overall layout control func
+        """
+        self.createFields("Alias")  # Create all necessary fields
+        self.createFields("Common Name")
+        self.createFields("Store Pass")
+        self.createFields("Key Size")
+        self.createFields("Validity")
+        self.createFields("Domain")
+        self.createFields("Country Code")
+        self.createFields("Email")
+        self.createFields("Key Pass")
+        self.createFields("CA's Path")
+
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL,spacing= 1)
         self.box.pack_start(vbox, True, True, 0)
 
-        # Horizontal box for key pair and req buttons
-        hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL,spacing= 1)
-        vbox.pack_start(hbox, True, True, 0)
-        
+            
+    def createButtons(self):
+        """
+        Func to create all needed buttons. SHould be optimized.
+        """
+        # Create a vertical box
+        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL,spacing= 1)
+        self.box.pack_start(vbox, True, True, 0)
+
+        # Add the folloing buttons to vbox
         button = Gtk.Button("Key Store")
         button.connect("clicked", self.on_click_keystore_clicked)
-        hbox.pack_start(button, True, True, 0)
-
-        hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL,spacing= 1)
-        vbox.pack_start(hbox, True, True, 0)
+        vbox.pack_start(button, True, True, 0)
 
         button = Gtk.Button("Show Cert")
         button.connect("clicked", self.on_click_show_clicked)
-        hbox.pack_start(button, True, True, 0)
-
-        # Hbox for show cert button
-        hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL,spacing= 1)
-        vbox.pack_start(hbox, True, True, 0)
+        vbox.pack_start(button, True, True, 0)
 
         button = Gtk.Button("Select Ca")
         button.connect("clicked", self.on_file_clicked)
-        hbox.pack_start(button, True, True, 0)
+        vbox.pack_start(button, True, True, 0)
 
-        # To update and display the input values:
-
-        # Hbox for show cert button
+        # We want to Put " a request" and " five requests" on the same row, so a hbox is used
         hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL,spacing= 1)
         vbox.pack_start(hbox, True, True, 0)
         
@@ -94,10 +98,11 @@ class ourwindow(Gtk.Window):
         hbox.pack_start(button, True, True, 0)
         
 
-
     def updateEntries(self):
+        """
+        To update the current content of all entries when it's called
+        """
         print "\n\n ------------ "
-
         for entry, name in zip(self.entries, self.names):
 
             tmp = entry.get_text()
@@ -256,7 +261,7 @@ class ourwindow(Gtk.Window):
 if __name__ == "__main__":
     window = ourwindow()
     window.layout()
-    window.createButton()
+    window.createButtons()
     window.connect("delete-event", Gtk.main_quit)
     window.show_all()
     Gtk.main()
