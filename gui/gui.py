@@ -23,7 +23,7 @@ class ourwindow(Gtk.Window):
         self.names = []
 
     def layout(self):
-            self.createFields("Alias")
+            self.createFields("Alias")  # Create all necessary fields
             self.createFields("Common Name")
             self.createFields("Store Pass")
             self.createFields("Key Size")
