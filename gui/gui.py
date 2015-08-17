@@ -107,40 +107,6 @@ class ourwindow(Gtk.Window):
         button.connect("clicked", self.on_click_fivereqbutton_clicked)
         hbox.pack_start(button, True, True, 0)
 
-    # def createButtons(self):
-    #     """
-    #     Func to create all needed buttons. SHould be optimized.
-    #     """
-    #     # Create a vertical box
-    #     vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL,spacing= 1)
-    #     self.box.pack_start(vbox, True, True, 0)
-
-    #     # Add the folloing buttons to vbox
-    #     button = Gtk.Button("Key Store")
-    #     button.connect("clicked", self.on_click_keystore_clicked)
-    #     vbox.pack_start(button, True, True, 0)
-
-    #     button = Gtk.Button("Show Cert")
-    #     button.connect("clicked", self.on_click_show_clicked)
-    #     vbox.pack_start(button, True, True, 0)
-
-    #     button = Gtk.Button("Select Ca")
-    #     button.connect("clicked", self.on_file_clicked)
-    #     vbox.pack_start(button, True, True, 0)
-
-    #     # We want to Put " a request" and " five requests" on the same row, so a hbox is used
-    #     hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL,spacing= 1)
-    #     vbox.pack_start(hbox, True, True, 0)
-        
-    #     button = Gtk.Button("A Request")
-    #     button.connect("clicked", self.on_click_reqbutton_clicked)
-    #     hbox.pack_start(button, True, True, 0)
-
-    #     button = Gtk.Button("Five Requests")
-    #     button.connect("clicked", self.on_click_fivereqbutton_clicked)
-    #     hbox.pack_start(button, True, True, 0)
-        
-
     def updateEntries(self):
         """
         To update the current content of all entries when it's called
