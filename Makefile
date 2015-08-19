@@ -89,7 +89,7 @@ rootca: rootdb rootcacsr
 ####### Targets.signning ca #########
 # Signing CA uses root cert to sign its cert
 signingcadb:
-	mkdir -p $(SIGNINGCA)/private $(SIGNING-CA)/db crl certs;\
+	mkdir -p $(SIGNINGCA)/private $(SIGNINGCA)/db crl certs;\
 	chmod 700 $(SIGNINGCA)/private
 	cp /dev/null $(SIGNINGCA)/db/signing-ca.db
 	cp /dev/null $(SIGNINGCA)/db/signing-ca.db.attr
