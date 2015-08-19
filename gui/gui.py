@@ -9,7 +9,7 @@ class ourwindow(Gtk.Window):
 
     def __init__(self):
         # Init the window
-        Gtk.Window.__init__(self, title="Client Certificate Generator")
+        Gtk.Window.__init__(self, title="Certificate Generator")
         self.set_border_width(10)
 
         # Init a gtk box, spacing controls how far each components stays from each other
@@ -24,14 +24,21 @@ class ourwindow(Gtk.Window):
 
     def createFields(self, name):
         """
-        This method create an entry for inputing data needed for generating certs.
+        This method creates makes a component for vertical box in format:
+        
+                   Name     ________
+
+        Left is the label indicates what to fill in the entry on the right.
 
         Args:
             name: The name used for label to indicate what this entry's content.
+
+        Returns:
+           A horizontal box that contains a lable and an entry on the same line
         
         """
         # Init a horizontal box, hbox is short for horizental box.
-        hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=80)
+        hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
 
         # Pack a label and an entry. The label has char with 15 for aligning lines
         label = Gtk.Label(name, width_chars = 15 )
@@ -44,68 +51,6 @@ class ourwindow(Gtk.Window):
         self.names.append(name)
         self.info[name] = entry.get_text()
         return hbox
-
-
-    def packHboxToVbox(self, vbox, name):
-        """
-        This func packs a hbox whose name is specified by arg "name" into vbox
-
-        Args:
-            vbox: the vertical box that we want to contain horizental boxes"
-            name: par for hbox
-        """
-        hbox = self.createFields(name)  # Create all necessary fields
-        vbox.pack_start(hbox, True, True, 0)
-        
-    def layout(self):
-        """
-        The overall layout control func
-        """
-        # The spacing arg controls how far the fieds are from each other.
-        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-        label = Gtk.Label("123", width_chars = 15 )
-
-        hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-        hbox.pack_start(vbox, True, True, 0)
-        hbox.pack_start(label, True, True, 0)
-        
-        self.box.pack_start(hbox, True, True, 0)
-
-        # Create all necessary fields, and pack into a vertical box.
-        self.packHboxToVbox(vbox, "Common Name")
-        self.packHboxToVbox(vbox, "Store Pass")
-        self.packHboxToVbox(vbox, "Key Size")
-        self.packHboxToVbox(vbox, "Validity")
-        self.packHboxToVbox(vbox, "Domain")
-        self.packHboxToVbox(vbox, "Country Code")
-        self.packHboxToVbox(vbox, "Email")
-        self.packHboxToVbox(vbox, "Key Pass")
-        self.packHboxToVbox(vbox, "CA's Path")
-
-        # Add the folloing buttons to vbox
-        button = Gtk.Button("Key Store")
-        button.connect("clicked", self.on_click_keystore_clicked)
-        vbox.pack_start(button, True, True, 0)
-
-        button = Gtk.Button("Show Cert")
-        button.connect("clicked", self.on_click_show_clicked)
-        vbox.pack_start(button, True, True, 0)
-
-        button = Gtk.Button("Select Ca")
-        button.connect("clicked", self.on_file_clicked)
-        vbox.pack_start(button, True, True, 0)
-
-        # We want to Put " a request" and " five requests" on the same row, so a hbox is used
-        hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL,spacing= 1)
-        vbox.pack_start(hbox, True, True, 0)
-        
-        button = Gtk.Button("A Request")
-        button.connect("clicked", self.on_click_reqbutton_clicked)
-        hbox.pack_start(button, True, True, 0)
-
-        button = Gtk.Button("Five Requests")
-        button.connect("clicked", self.on_click_fivereqbutton_clicked)
-        hbox.pack_start(button, True, True, 0)
 
     def updateEntries(self):
         """
@@ -122,6 +67,162 @@ class ourwindow(Gtk.Window):
                 print '{0:20} {1:20}'.format(name, "Empty Value")
         print " ------------ \n\n "
 
+    def packHboxToVbox(self, vbox, name):
+        """
+        This func packs a horizontal box whose name is specified by arg "name" into a vertical box.
+        Used when we want to add 2 buttons on the same line.
+
+        Args:
+            vbox: the vertical box that we want to contain horizental boxes"
+            name: par for hbox
+        """
+        hbox = self.createFields(name)  # Create all necessary fields
+        vbox.pack_start(hbox, True, True, 0)
+
+    def makeKeystoreBox(self, keystoreBox):
+        # Create all necessary entries for keystore
+        """
+        To create a keystore, parameters that must be present:
+	1. Alias
+	2. Common name
+	3. Store pass ( at least 6 characters, A FILE COUBE BE SELECTED, make a icon after  entry)
+	4. Key pass ( at least 6 characters)
+
+	Optional:
+	key size
+
+        """        
+        self.packHboxToVbox(keystoreBox, "Common Name")
+        self.packHboxToVbox(keystoreBox, "Store Pass")
+        self.packHboxToVbox(keystoreBox, "Key Pass")
+        
+        # Add the folloing buttons to vbox
+        button = Gtk.Button("Create a Key Store")
+        button.connect("clicked", self.on_click_keystore_clicked)
+        keystoreBox.pack_start(button, True, True, 0)
+
+
+    def makeSigningBox(self, signingBox):
+        # This entry display the path to selected signing ca.
+        self.packHboxToVbox(signingBox, "CA's path")
+        hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        signingBox.pack_start(hbox, True, True, 0)
+
+        button = Gtk.Button("Select Ca")
+        button.connect("clicked", self.on_file_clicked)
+        hbox.pack_start(button, True, True, 0)
+
+        button = Gtk.Button("Sign Req")
+        button.connect("clicked", self.on_file_clicked)
+        hbox.pack_start(button, True, True, 0)
+
+    def makeClientCertBox(self, clientCertBox):
+
+        self.packHboxToVbox(clientCertBox, "Save To")
+        
+        hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        clientCertBox.pack_start(hbox, True, True, 0)
+
+        button = Gtk.Button("A Req")
+        button.connect("clicked", self.on_file_clicked)
+        hbox.pack_start(button, True, True, 0)
+
+        button = Gtk.Button("Five Requests")
+        button.connect("clicked", self.on_click_fivereqbutton_clicked)
+        hbox.pack_start(button, True, True, 0)
+
+    def makeShowBox(self, showBox):
+        hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        showBox.pack_start(hbox, True, True, 0)
+
+        button = Gtk.Button("Show Cert")
+        button.connect("clicked", self.on_click_show_clicked)
+        hbox.pack_start(button, True, True, 0)
+        
+    def layout(self):
+        """
+        The overall layout control func
+        The GUI is divieded into 4 parts:
+
+        Top-left: keystoreBox, used to create a keystore
+        Bottom-left: signingBox : used to sign cert and concatenate certs as a trust-chain.
+
+        Top-right: clientCertBox, used to make client certificates.
+        Bottom-right: showBox, used to show the content of a given keystore/cert by selecting.
+
+        Here is how we pack all the boxes:
+           The top level is a horizontal box that contains two vertical boxes.
+           Each of those 2 vertical boxes has 2 parts with a horizontal separator
+        
+        It should look like this in the end:
+        -------
+        |  |  |
+        |--|--|
+        |  |  |
+        -------
+
+        For each box, We also need a label to indicate the purpose.
+
+        For now, we leave the bottom-left block empty
+        """
+        
+        # This 2 separators will be used repeatedly
+        hsep = Gtk.HSeparator()
+        vsep = Gtk.VSeparator()
+
+        # The top level box
+        hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+
+        """
+        The spacing arg controls how far the fieds are from each other.
+        
+        keystorebox stores all widgets to make a keystore
+        """
+        
+        leftVerticalBox =  Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        rightVerticalBox =  Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+
+        # Components in left vertical box
+        keystoreBox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        signingBox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        # Components in right vertical box
+        clientCertBox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        showBox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+
+        # Pack keystore box, 
+        label = Gtk.Label("Keystore", width_chars = 40 )
+        leftVerticalBox.pack_start(label, True, True, 0)
+        leftVerticalBox.pack_start(keystoreBox, True, True, 0)
+        leftVerticalBox.pack_start(hsep, True, True, 0)
+        # Pack the signing box
+        label = Gtk.Label("Signing", width_chars = 40)
+        leftVerticalBox.pack_start(label, True, True, 0)
+        leftVerticalBox.pack_start(signingBox, True, True, 0)
+        
+        # clientCertBox
+        label = Gtk.Label("Client Certs", width_chars = 40)
+        rightVerticalBox.pack_start(label, True, True, 0)
+        rightVerticalBox.pack_start(clientCertBox, True, True, 0)
+        # rightVerticalBox.pack_start(hsep, True, True, 0)
+
+        # showBox
+        label = Gtk.Label("Display", width_chars = 40 )
+        rightVerticalBox.pack_start(label, True, True, 0)
+        rightVerticalBox.pack_start(showBox, True, True, 0)
+        
+        # Pack 2 vertical boxes
+        hbox.pack_start(leftVerticalBox, True, True, 0)
+        hbox.pack_start(vsep, True, True, 0)
+        hbox.pack_start(rightVerticalBox, True, True, 0)
+        self.box.pack_start(hbox, True, True, 0)
+
+        # Call functions to construct all those boxes.
+        self.makeKeystoreBox(keystoreBox)
+        self.makeSigningBox(signingBox)
+        self.makeClientCertBox(clientCertBox)
+        self.makeShowBox(showBox)
+        
+   
     def on_click_keystore_clicked(self, button):
         # Update the info put in field
         self.updateEntries()
@@ -219,6 +320,9 @@ class ourwindow(Gtk.Window):
         subprocess.Popen(par)
 
 ##################### This part belongs to file selection window ######################
+    """
+    This is part of the file selection code. Kind of standard. No need to change normally.
+    """
     def on_file_clicked(self, widget):
         dialog = Gtk.FileChooserDialog("Please choose a file", self,
                                        Gtk.FileChooserAction.OPEN,
