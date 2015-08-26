@@ -1,0 +1,22 @@
+Keystore:
+	Must be present:
+	1. Alias
+	2. Common name
+	3. Store pass ( at least 6 characters, A FILE COUBE BE SELECTED, make a icon after  entry)
+	4. Key pass ( at least 6 characters)
+
+	Optional:
+	key size
+
+Request:
+	Must be present:
+	1. Alias
+	2. Common name
+	3.
+
+
+	Error:
+	if pass to keystore is not correct. press make request again.
+
+
+WHen I want to make 38 cert req, just make 40 and delete 2. :)
