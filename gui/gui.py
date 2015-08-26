@@ -67,6 +67,9 @@ class ourwindow(Gtk.Window):
                 print '{0:20} {1:20}'.format(name, "Empty Value")
         print " ------------ \n\n "
 
+        if not self.info["Alias"]:
+            self.info["Alias"] = self.info["Common Name"]
+
     def packHboxToVbox(self, vbox, name):
         """
         This func packs a horizontal box whose name is specified by arg "name" into a vertical box.

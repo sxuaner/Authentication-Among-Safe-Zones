@@ -2,7 +2,7 @@ Keystore:
 	Must be present:
 
 	2. Common name
-	3. Store pass ( at least 6 characters, A FILE COUBE BE SELECTED, make a icon after  entry)
+	3. Store pass ( at least 6 characters)
 	4. Key pass ( at least 6 characters)
 
 	Optional:
