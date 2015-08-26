@@ -95,6 +95,11 @@ class ourwindow(Gtk.Window):
         self.packHboxToVbox(keystoreBox, "Common Name")
         self.packHboxToVbox(keystoreBox, "Store Pass")
         self.packHboxToVbox(keystoreBox, "Key Pass")
+        label = Gtk.Label("Optional", width_chars = 15 )
+        keystoreBox.pack_start(label, True, True, 0)
+        self.packHboxToVbox(keystoreBox, "Alias")
+        self.packHboxToVbox(keystoreBox, "Key Size")
+        
         
         # Add the folloing buttons to vbox
         button = Gtk.Button("Create a Key Store")
@@ -123,8 +128,8 @@ class ourwindow(Gtk.Window):
         hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         clientCertBox.pack_start(hbox, True, True, 0)
 
-        button = Gtk.Button("A Req")
-        button.connect("clicked", self.on_file_clicked)
+        button = Gtk.Button("One Req")
+        button.connect("clicked", self.on_click_reqbutton_clicked)
         hbox.pack_start(button, True, True, 0)
 
         button = Gtk.Button("Five Requests")
@@ -180,7 +185,7 @@ class ourwindow(Gtk.Window):
         """
         
         leftVerticalBox =  Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-        rightVerticalBox =  Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+        rightVerticalBox =  Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
 
         # Components in left vertical box
         keystoreBox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
@@ -238,12 +243,14 @@ class ourwindow(Gtk.Window):
         if not self.info["Key Size"]:
             self.info["Key Size"]= 2048
 
+        if not self.info["Alias"]:
+            self.info["Alias"] = self.info["Common Name"]
+        
         if not os.path.exists("../keystore"):
             if self.info["Common Name"]:
-                if self.info["Alias"]:
                     par = ["/bin/keytool",
                            "-genkeypair",
-                           "-alias", str( self.info["Alias"]),
+                           "-alias", str( self.info["Common Name"]),
                            "-dname", str("CN=" + self.info["Common Name"]),
                            "-keystore", "../keystore",
                            "-keysize", str(self.info["Key Size"]),
@@ -251,8 +258,7 @@ class ourwindow(Gtk.Window):
                            "-storepass", str(self.info["Store Pass"])
                     ]
                     subprocess.Popen(par)
-                else:
-                    print "Alias is not provided"
+                    print "Your keystore has been created, locating at top directory"
             else:
                 print "Common Name is not provided"
         else:
@@ -319,7 +325,7 @@ class ourwindow(Gtk.Window):
         ]
         subprocess.Popen(par)
 
-##################### This part belongs to file selection window ######################
+##################### file selection dialog part ######################
     """
     This is part of the file selection code. Kind of standard. No need to change normally.
     """
