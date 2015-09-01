@@ -1,6 +1,5 @@
 Keystore:
 	Must be present:
-
 	2. Common name
 	3. Store pass ( at least 6 characters)
 	4. Key pass ( at least 6 characters)
@@ -34,3 +33,6 @@ WHen I want to make 38 cert req, just make 40 and delete 2. :)
 
 
 By default, keytool locates at /bin/keytool. Find out which package needs installing.
+
+
+what algorithm to use?? keyalg and sigalg
