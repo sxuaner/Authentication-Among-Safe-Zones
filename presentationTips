@@ -1,0 +1,33 @@
+Certificate:
+
+1. Background.
+2. usecases
+
+3. How key store works :
+Generates a key pair (a public key and associated private key). Wraps the public key into an X.509 v3 self-signed certificate, which is stored as a single-element certificate chain. This certificate chain and the private key are stored in a new keystore entry identified by alias.
+
+
+
+
+4. We use keystore, pass should be provided.
+
+5. what's stored in keystore??
+Your keystore contains 1 entry
+
+sx, Aug 26, 2015, PrivateKeyEntry, 
+Certificate fingerprint (SHA1): E3:F3:8F:A8:B6:86:0A:C4:0B:E3:72:09:B1:45:D2:40:07:D9:17:8B
+
+
+6. We'd like to have multiple client certs. We need to create multiple key pairs.
+
+
+7. One req:
+   if the key exists, just click on it
+   if not, create a key pair first
+
+   5 req:
+   create key pair auto for you
+
+
+8. HIde the passwords using keystore. In the furture if needed, a selection of password file can also be implemented.
+
