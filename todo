@@ -1,0 +1,20 @@
+Include email addr into the email certificate
+Revocation list.
+display the cert && open file window
+display  aliases
+Alias field check, common name field check according to the policies
+Key story is loacted at ~/.keystore
+list key info of a alias
+checkout the name extensions supported by keytool
+signing algo?
+sign the request using certain signing ca key
+
+The command uses the default SHA1withDSA signature algorithm to create a self-signed certificate that includes the public key and the distinguished name information
+
+
+root ca and signing ca's cert should be imported from other places??
+
+chain of trust.
+
+
+hide the pass
