@@ -50,6 +50,15 @@ class ourwindow(Gtk.Window):
         self.entries.append(entry)
         self.names.append(name)
         self.info[name] = entry.get_text()
+
+        if name == "Key Pass":
+            self.keypass = entry
+            self.keypass.set_visibility(False)
+
+        if name == "Store Pass":
+            self.storepass = entry
+            self.storepass.set_visibility(False)
+            
         return hbox
 
     def updateEntries(self):
@@ -190,7 +199,6 @@ class ourwindow(Gtk.Window):
 
         # The top level box
         hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-
         """
         The spacing arg controls how far the fieds are from each other.
         
@@ -210,18 +218,32 @@ class ourwindow(Gtk.Window):
         self.makeClientCertBox(clientCertBox)
         self.makeShowBox(showBox)
 
-        # Pack keystore box,
-
+        """
+        Start packing Keystore box. 
+        First of all, a label is packed to indicate the purpose of the part.
+        """
         label = Gtk.Label("Keystore", width_chars = 40 )
         VerticalBox.pack_start(label, True, True, 0)
         hsep4 = Gtk.HSeparator()
         self.packHboxToVbox(VerticalBox, "Store Pass")
+
+        # Following "Store Pass" entry is a visibility checkbutton.
+        # check_visible is a check button. We use it to choose the visibility of entry "Store Pass"
+        button_box = Gtk.HButtonBox()
+        check_visible = Gtk.CheckButton("Visible")
+
+        check_visible.connect("toggled", self.on_storepass_visible_toggled)
+        check_visible.set_active(False)
+        button_box.add(check_visible)
+        VerticalBox.pack_start(button_box, True, True, 0)
+
+        # This part contains:
         VerticalBox.pack_start(hsep4, True, True, 0)
         VerticalBox.pack_start(keystoreBox, True, True, 0)
         hsep = Gtk.HSeparator()
         VerticalBox.pack_start(hsep, True, True, 0)
      
-        # clientCertBox
+        # clientCertBox contains:
         label = Gtk.Label("Client Certs", width_chars = 40)
         VerticalBox.pack_start(label, True, True, 0)
         VerticalBox.pack_start(clientCertBox, True, True, 0)
@@ -242,6 +264,13 @@ class ourwindow(Gtk.Window):
 
         self.box.pack_start(VerticalBox, True, True, 0)
 
+
+####################  All followings are methods to button click ####################
+    def on_storepass_visible_toggled(self, button):
+        value = button.get_active()
+        self.storepass.set_visibility(value)
+        self.keypass.set_visibility(value)
+        
     def on_click_keystore_clear_clicked(self, button):
         """
         I understand it's a bad design. All the entries are instaniated in a ording shown on GUI
