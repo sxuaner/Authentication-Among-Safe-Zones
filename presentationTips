@@ -31,3 +31,34 @@ Certificate fingerprint (SHA1): E3:F3:8F:A8:B6:86:0A:C4:0B:E3:72:09:B1:45:D2:40:
 
 8. HIde the passwords using keystore. In the furture if needed, a selection of password file can also be implemented.
 
+
+9. what needs to be filled in common name
+
+10 find info about alias of keytool.
+
+11. A general intro of background.  Pics included
+
+
+12. What can be done in the future?? GUI is done. NOthing. Focus on mbus things
+
+13. The general flow:
+    1. make a keystore
+       * Keyword file can be selected.
+    2. Make a req
+    3. Make 5 reqs
+    5. display
+    6. Sign the certificate
+       * Explain why there are 2 warnings.
+        GtkButton:use-stock is deprecated and shouldn't be used anymore, It will be removed in a future version.
+	what is use-stock??
+	http://www.pygtk.org/pygtk2reference/gtk-stock-items.html
+	Needs to be specified in the doc.
+
+	choose a random one in the folder and all will be added.
+
+    7. export the certificate.
+
+    
+
+
+

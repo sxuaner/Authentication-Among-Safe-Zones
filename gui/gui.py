@@ -5,6 +5,10 @@ from gi.repository import Gtk
 import subprocess
 import os.path
 
+# Change the default admin keyword here.
+STOREKEYWORD = "keystoreadmin"
+
+
 class ourwindow(Gtk.Window):
 
     def __init__(self):
@@ -58,6 +62,9 @@ class ourwindow(Gtk.Window):
         if name == "Store Pass":
             self.storepass = entry
             self.storepass.set_visibility(False)
+            self.storepass.set_text(STOREKEYWORD)
+        if name == "CA's Path":
+            self.capath = entry
             
         return hbox
 
@@ -119,7 +126,7 @@ class ourwindow(Gtk.Window):
         self.packHboxToVbox(keystoreBox, "Key Size")
         
         # Create a button for creating key pair
-        button = Gtk.Button("Create a Key Pair")
+        button = Gtk.Button(" Key Pair")
         button.connect("clicked", self.on_click_keypair_clicked)
 
         hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -130,22 +137,17 @@ class ourwindow(Gtk.Window):
         hbox.pack_start(button, True, True, 0 )
         keystoreBox.pack_start(hbox, True, True, 0)
 
-    def makeClientCertBox(self, clientCertBox):
-
-        hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-        clientCertBox.pack_start(hbox, True, True, 0)
-
         button = Gtk.Button("One Req")
         button.connect("clicked", self.on_click_reqbutton_clicked)
-        hbox.pack_start(button, True, True, 0)
+        keystoreBox.pack_start(button, True, True, 0)
 
-        button = Gtk.Button("Five Reqs")
+        button = Gtk.Button("Five Keypairs and Reqs")
         button.connect("clicked", self.on_click_fivereqbutton_clicked)
-        hbox.pack_start(button, True, True, 0)
+        keystoreBox.pack_start(button, True, True, 0)     
 
     def makeSigningBox(self, signingBox):
         # This entry display the path to selected signing ca.
-        self.packHboxToVbox(signingBox, "CA's path")
+        self.packHboxToVbox(signingBox, "CA's Path")
         hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         signingBox.pack_start(hbox, True, True, 0)
 
@@ -156,7 +158,6 @@ class ourwindow(Gtk.Window):
         button = Gtk.Button("Sign Req")
         button.connect("clicked", self.on_file_clicked)
         hbox.pack_start(button, True, True, 0)
-
    
 
     def makeShowBox(self, showBox):
@@ -215,7 +216,6 @@ class ourwindow(Gtk.Window):
         # Call functions to construct all those boxes.
         self.makeKeystoreBox(keystoreBox)
         self.makeSigningBox(signingBox)
-        self.makeClientCertBox(clientCertBox)
         self.makeShowBox(showBox)
 
         """
@@ -242,13 +242,6 @@ class ourwindow(Gtk.Window):
         VerticalBox.pack_start(keystoreBox, True, True, 0)
         hsep = Gtk.HSeparator()
         VerticalBox.pack_start(hsep, True, True, 0)
-     
-        # clientCertBox contains:
-        label = Gtk.Label("Client Certs", width_chars = 40)
-        VerticalBox.pack_start(label, True, True, 0)
-        VerticalBox.pack_start(clientCertBox, True, True, 0)
-        hsep2 = Gtk.HSeparator()
-        VerticalBox.pack_start(hsep2, True, True, 0)
 
         # Pack the signing box
         label = Gtk.Label("Signing", width_chars = 40)
@@ -315,32 +308,32 @@ class ourwindow(Gtk.Window):
         else:
             print "Alias is required"
 
-    def on_click_five_keypair_clicked(self, button):
-        self.updateEntries()
-         # To have 5 reqs, we need to have 5 key pairs.
-        if not self.info["Key Size"]:
-            self.info["Key Size"]= 2048
+    # def on_click_five_keypair_clicked(self, button):
+    #     self.updateEntries()
+    #      # To have 5 reqs, we need to have 5 key pairs.
+    #     if not self.info["Key Size"]:
+    #         self.info["Key Size"]= 2048
 
-        for i in range(1, 5):
-            if self.info["Alias"]:             # Just to make sure Alias is not empty
-                if self.info["Common Name"]:
-                    par = ["/bin/keytool",
-                           "-genkeypair",
-                           "-alias", str( self.info["Alias"] + str(i)),
-                           "-dname", str("CN=" + self.info["Common Name"]),  # They share common CN
-                           "-keystore", "../keystore",
-                           "-keysize", str(self.info["Key Size"]),
-                           "-keypass", str(self.info["Key Pass"]),
-                           "-storepass", str(self.info["Store Pass"])
-                    ]
-                    result = subprocess.Popen(par)
-                    result.wait()
-                    # Need to cache ster here 
-                    print "Key pair " + self.info["Alias"] + str(i)+ " has been generated."
-                else:
-                    print "Common Name is not provided"
-            else:
-                print "Alias is required"
+    #     for i in range(1, 5):
+    #         if self.info["Alias"]:             # Just to make sure Alias is not empty
+    #             if self.info["Common Name"]:
+    #                 par = ["/bin/keytool",
+    #                        "-genkeypair",
+    #                        "-alias", str( self.info["Prefix"] + str(i)),
+    #                        "-dname", str("CN=" + self.info["Common Name"]),  # They share common CN
+    #                        "-keystore", "../keystore",
+    #                        "-keysize", str(self.info["Key Size"]),
+    #                        "-keypass", str(self.info["Key Pass"]),
+    #                        "-storepass", str(self.info["Store Pass"])
+    #                 ]
+    #                 result = subprocess.Popen(par)
+    #                 result.wait()
+    #                 # Need to cache ster here 
+    #                 print "Key pair " + self.info["Alias"] + str(i)+ " has been generated."
+    #             else:
+    #                 print "Common Name is not provided"
+    #         else:
+    #             print "Alias is required"
 
     def on_click_reqbutton_clicked(self, button):
         self.updateEntries()
@@ -367,7 +360,8 @@ class ourwindow(Gtk.Window):
                "-storepass", str(self.info["Store Pass"]),
                "-keypass", self.info["Key Pass"]
         ]
-        subprocess.Popen(par)
+        result = subprocess.Popen(par)
+        result.wait()
         print "Req has been successfully made"
 
     def on_click_fivereqbutton_clicked(self, button):
@@ -386,27 +380,21 @@ class ourwindow(Gtk.Window):
             self.info["Key Size"]= 2048
 
         for i in range(0, 5):
-            if self.info["Alias"]:             # Just to make sure Alias is not empty
-                if self.info["Common Name"]:
-                    par = ["/bin/keytool",
-                           "-genkeypair",
-                           "-alias", str( self.info["Alias"] + str(i)),
-                           "-dname", str("CN=" + self.info["Common Name"]),  # They share common CN
-                           "-keystore", "../keystore",
-                           "-keysize", str(self.info["Key Size"]),
-                           "-keypass", str(self.info["Key Pass"]),
-                           "-storepass", str(self.info["Store Pass"])
-                    ]
-                    result = subprocess.Popen(par)
-                    result.wait()
-                    # Need to cache ster here 
-                    print "Key pair " + self.info["Alias"] + str(i)+ " has been generated."
-                else:
-                    print "Common Name is not provided"
-            else:
-                print "Alias is required"
+            par = ["/bin/keytool",
+                   "-genkeypair",
+                   "-alias", str( self.info["Alias"] + str(i)),
+                   "-dname", str("CN=" + self.info["Common Name"]),  # They share common CN
+                   "-keystore", "../keystore",
+                   "-keysize", str(self.info["Key Size"]),
+                   "-keypass", str(self.info["Key Pass"]),
+                   "-storepass", str(self.info["Store Pass"])
+                ]
+            result = subprocess.Popen(par)
+            result.wait()
+            print result
+            print "Key pair " + self.info["Alias"] + str(i)+ " has been generated."
+
        
-        
         # Make 5 certs based on alias
         for j in range(0, 5):
             par = ["/bin/keytool",
@@ -417,9 +405,8 @@ class ourwindow(Gtk.Window):
                    "-storepass", str(self.info["Store Pass"]),
                    "-keypass", self.info["Key Pass"]
             ]
-            subprocess.Popen(par)
-
-    
+            result = subprocess.Popen(par)
+            result.wait()
 
     def on_click_show_clicked(self,button):
         self.updateEntries()
@@ -442,32 +429,30 @@ class ourwindow(Gtk.Window):
                                        Gtk.FileChooserAction.OPEN,
                                        (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                                         Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
+        dialog.set_select_multiple(True)
         self.add_filters(dialog)
 
         response = dialog.run()
         if response == Gtk.ResponseType.OK:
             print("Open clicked")
             print("File selected: " + dialog.get_filename())
+            self.capath.set_text(dialog.get_filename())
+
+            """
+            Sign the choosed request.
+            """
+
+            
         elif response == Gtk.ResponseType.CANCEL:
             print("Cancel clicked")
 
         dialog.destroy()
 
     def add_filters(self, dialog):
-        filter_text = Gtk.FileFilter()
-        filter_text.set_name("Text files")
-        filter_text.add_mime_type("text/plain")
-        dialog.add_filter(filter_text)
-
-        filter_py = Gtk.FileFilter()
-        filter_py.set_name("Python files")
-        filter_py.add_mime_type("text/x-python")
-        dialog.add_filter(filter_py)
-
-        filter_any = Gtk.FileFilter()
-        filter_any.set_name("Any files")
-        filter_any.add_pattern("*")
-        dialog.add_filter(filter_any)
+        filter_csr = Gtk.FileFilter()
+        filter_csr.set_name("csr files")
+        filter_csr.add_pattern("*.csr")
+        dialog.add_filter(filter_csr)
 
     def on_folder_clicked(self, widget):
         dialog = Gtk.FileChooserDialog("Please choose a folder", self,
