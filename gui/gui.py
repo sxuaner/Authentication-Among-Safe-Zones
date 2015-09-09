@@ -313,39 +313,13 @@ class ourwindow(Gtk.Window):
                        "-keypass", str(self.info["Key Pass"]),
                        "-storepass", str(self.info["Store Pass"])
                 ]
-                subprocess.Popen(par)
-                print "Key pair has been generated."
+                result = subprocess.call(par)
+                if not result:
+                    print "Key pair has been generated."
             else:
                 print "Common Name is not provided"
         else:
             print "Alias is required"
-
-    # def on_click_five_keypair_clicked(self, button):
-    #     self.updateEntries()
-    #      # To have 5 reqs, we need to have 5 key pairs.
-    #     if not self.info["Key Size"]:
-    #         self.info["Key Size"]= 2048
-
-    #     for i in range(1, 5):
-    #         if self.info["Alias"]:             # Just to make sure Alias is not empty
-    #             if self.info["Common Name"]:
-    #                 par = ["/bin/keytool",
-    #                        "-genkeypair",
-    #                        "-alias", str( self.info["Prefix"] + str(i)),
-    #                        "-dname", str("CN=" + self.info["Common Name"]),  # They share common CN
-    #                        "-keystore", "../keystore",
-    #                        "-keysize", str(self.info["Key Size"]),
-    #                        "-keypass", str(self.info["Key Pass"]),
-    #                        "-storepass", str(self.info["Store Pass"])
-    #                 ]
-    #                 result = subprocess.Popen(par)
-    #                 result.wait()
-    #                 # Need to cache ster here 
-    #                 print "Key pair " + self.info["Alias"] + str(i)+ " has been generated."
-    #             else:
-    #                 print "Common Name is not provided"
-    #         else:
-    #             print "Alias is required"
 
     def on_click_reqbutton_clicked(self, button):
         self.updateEntries()
@@ -355,7 +329,7 @@ class ourwindow(Gtk.Window):
             par = ["mkdir",
                    "-p", "../clientCerts"
             ]
-            subprocess.Popen(par)
+            subprocess.call(par)
 
         # @par:
         #  -certreq: make a cert request
@@ -417,8 +391,7 @@ class ourwindow(Gtk.Window):
                    "-storepass", str(self.info["Store Pass"]),
                    "-keypass", self.info["Key Pass"]
             ]
-            result = subprocess.Popen(par)
-            result.wait()
+            result = subprocess.call(par)
 
     def on_click_show_clicked(self,button):
         self.updateEntries()
@@ -438,7 +411,6 @@ class ourwindow(Gtk.Window):
         This methods is called when button " Sign Req " is pressed.
         Defined makeSigningBox().
         """
-        print "sign"
         
     """
     This is part of the file selection code. Kind of standard. No need to change normally.
