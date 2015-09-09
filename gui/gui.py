@@ -441,33 +441,41 @@ class ourwindow(Gtk.Window):
                 print "File selected", i
         elif response == Gtk.ResponseType.CANCEL:
             print("Cancel clicked")
-
+        
         dialog.destroy()
 
+        # After the selection of csr files, we pop up a window to display.
+        popup = Gtk.Window()
+        popup.set_title("CSR File selected")
+        popup.set_border_width(10)
+        popup.set_default_size(600,400)
+        popup.set_modal(False)
+        grid = Gtk.Grid()
+        grid.set_column_homogeneous(True)
+        grid.set_row_homogeneous(True)
+        popup.add(grid)
 
-        # grid = Gtk.Grid()
-        # grid.set_column_homogeneous(True)
-        # grid.set_row_homogeneous(True)
-        # # creating a list store
-        # csr_liststore = Gtk.ListStore(str)
-        # # Import all the selected csr files into list store.
-        # for i in self.csr:
-        #     software_liststore.append(i)
+        # creating a list store
+        csr_liststore = Gtk.ListStore(str)
 
-        # treeview = Gtk.TreeView(csr_liststore)
-        # renderer = Gtk.CellRendererText()
-        # column = Gtk.TreeViewColumn("CSR File", renderer, text = "CSR File")
-        # treeview.append_column(column)
-        #         #setting up the layout, putting the treeview in a scrollwindow, and the buttons in a row
-        # scrollable_treelist = Gtk.ScrolledWindow()
-        # scrollable_treelist.set_vexpand(True)
-        # grid.attach(self.scrollable_treelist, 0, 0, 8, 10)
-        # grid.attach_next_to(self.buttons[0], self.scrollable_treelist, Gtk.PositionType.BOTTOM, 1, 1)
-        # for i, button in enumerate(self.buttons[1:]):
-        #     self.grid.attach_next_to(button, self.buttons[i], Gtk.PositionType.RIGHT, 1, 1)
-        # self.scrollable_treelist.add(self.treeview)
+        # Import all the selected csr files into list store.
+        for i in self.csr:
+            i = [i,]
+            csr_liststore.append(i)
+        # Creating a treeview
+        treeview = Gtk.TreeView(csr_liststore)
+        renderer = Gtk.CellRendererText()
+        for i, colname in enumerate(["CSR File"]):
+            column = Gtk.TreeViewColumn(colname, renderer, text = i)
+        treeview.append_column(column)
+        #setting up the layout, putting the treeview in a scrollwindow, and the buttons in a row
+        scrollable_treelist = Gtk.ScrolledWindow()
+        scrollable_treelist.set_vexpand(True)
+        grid.attach(scrollable_treelist, 0, 0, 8, 10)
 
-        # self.show_all()
+        scrollable_treelist.add(treeview)
+
+        popup.show_all()
         
     def add_filters(self, dialog):
         filter_csr = Gtk.FileFilter()
@@ -500,6 +508,7 @@ class ourwindow(Gtk.Window):
         elif response == Gtk.ResponseType.CANCEL:
             print("Cancel clicked")
         dialog.destroy()
+        
 ###################### End of file selection window ######################        
     
 if __name__ == "__main__":

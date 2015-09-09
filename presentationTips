@@ -6,18 +6,11 @@ Certificate:
 Generates a key pair (a public key and associated private key). Wraps the public key into an X.509 v3 self-signed certificate, which is stored as a single-element certificate chain. This certificate chain and the private key are stored in a new keystore entry identified by alias.
 
 
-
-
-4. We use keystore, pass should be provided.
-
 5. what's stored in keystore??
 Your keystore contains 1 entry
 
 sx, Aug 26, 2015, PrivateKeyEntry, 
 Certificate fingerprint (SHA1): E3:F3:8F:A8:B6:86:0A:C4:0B:E3:72:09:B1:45:D2:40:07:D9:17:8B
-
-
-6. We'd like to have multiple client certs. We need to create multiple key pairs.
 
 
 7. One req:
@@ -27,18 +20,15 @@ Certificate fingerprint (SHA1): E3:F3:8F:A8:B6:86:0A:C4:0B:E3:72:09:B1:45:D2:40:
    5 req:
    create key pair auto for you
 
-
-8. HIde the passwords using keystore. In the furture if needed, a selection of password file can also be implemented.
-
-
 9. what needs to be filled in common name
 
-10 find info about alias of keytool.
+10 terminology that Needs to be explained:
+   Alias.
+   Common Name
 
 11. A general intro of background.  Pics included
 
-
-12. What can be done in the future?? GUI is done. NOthing. Focus on mbus things
+12. What can be done in the future?? GUI is done. Code optimization . testing. etc.
 
 13. The general flow:
     1. make a keystore
@@ -48,14 +38,15 @@ Certificate fingerprint (SHA1): E3:F3:8F:A8:B6:86:0A:C4:0B:E3:72:09:B1:45:D2:40:
     5. display
     6. Sign the certificate
        * Explain why there are 2 warnings.
-        GtkButton:use-stock is deprecated and shouldn't be used anymore, It will be removed in a future version.
-	what is use-stock??
-	http://www.pygtk.org/pygtk2reference/gtk-stock-items.html
-	Needs to be specified in the doc.
+       GtkButton:use-stock is deprecated and shouldn't be used anymore,
+       It will be removed in a future version.
 
-	select multiple files and what if the selected file is not a request???
-	check this -----BEGIN NEW CERTIFICATE REQUEST----- and filter the file sufix.
+       what is use-stock??
+       http://www.pygtk.org/pygtk2reference/gtk-stock-items.html
+       Needs to be specified in the doc.
 
+       select multiple files and what if the selected file is not a request???
+       check this -----BEGIN NEW CERTIFICATE REQUEST----- and filter the file sufix.
 
 	check what is needed to sign the requests.
 
