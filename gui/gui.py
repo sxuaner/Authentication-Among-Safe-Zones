@@ -149,21 +149,30 @@ class ourwindow(Gtk.Window):
         keystoreBox.pack_start(button, True, True, 0)     
 
     def makeSigningBox(self, signingBox):
+        """
+        This method creates box that contains components of signingBox
+        
+        Arg:
+        signingBox: it's initially an empty box. This methods fills it with components
+        """
         # This entry display the path to selected signing ca.
         self.packHboxToVbox(signingBox, "CA's Path")
         hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         signingBox.pack_start(hbox, True, True, 0)
 
         button = Gtk.Button("Select Ca")
-        button.connect("clicked", self.on_file_clicked)
+        button.connect("clicked", self.on_csr_file_clicked)
         hbox.pack_start(button, True, True, 0)
 
         button = Gtk.Button("Sign Req")
-        button.connect("clicked", self.on_file_clicked)
+        button.connect("clicked", self.on_sign_clicked)
         hbox.pack_start(button, True, True, 0)
    
 
     def makeShowBox(self, showBox):
+        """
+        Refer to make SigningBox
+        """
         hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         showBox.pack_start(hbox, True, True, 0)
 
@@ -240,7 +249,7 @@ class ourwindow(Gtk.Window):
         button_box.add(check_visible)
         VerticalBox.pack_start(button_box, True, True, 0)
 
-        # This part contains:
+        # Pack keystorebox to the vertical box
         VerticalBox.pack_start(hsep4, True, True, 0)
         VerticalBox.pack_start(keystoreBox, True, True, 0)
         hsep = Gtk.HSeparator()
@@ -363,9 +372,9 @@ class ourwindow(Gtk.Window):
                "-storepass", str(self.info["Store Pass"]),
                "-keypass", self.info["Key Pass"]
         ]
-        result = subprocess.Popen(par)
-        result.wait()
-        print "Req has been successfully made"
+        result = subprocess.call(par)
+        if not result:
+            print "Req has been successfully made"
 
     def on_click_fivereqbutton_clicked(self, button):
         self.updateEntries()
@@ -423,11 +432,20 @@ class ourwindow(Gtk.Window):
         ]
         subprocess.Popen(par)
 
+    def on_sign_clicked(self, widget):
+        """
+        This methods is called when button " Sign Req " is pressed.
+        Defined makeSigningBox().
+        """
+        print "sign"
+        
+
 ##################### file selection dialog part ######################
     """
     This is part of the file selection code. Kind of standard. No need to change normally.
-    """
-    def on_file_clicked(self, widget):
+    """  
+
+    def on_csr_file_clicked(self, widget):
         dialog = Gtk.FileChooserDialog("Please choose a file", self,
                                        Gtk.FileChooserAction.OPEN,
                                        (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
@@ -453,7 +471,6 @@ class ourwindow(Gtk.Window):
             
         elif response == Gtk.ResponseType.CANCEL:
             print("Cancel clicked")
-
         dialog.destroy()
 
     def add_filters(self, dialog):
