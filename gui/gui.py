@@ -55,6 +55,9 @@ class ourwindow(Gtk.Window):
         self.names.append(name)
         self.info[name] = entry.get_text()
 
+        """
+        The following lines of code exports vairables with specified name as global variable, as such these exported variables can be accessed by "self.name"
+        """
         if name == "Key Pass":
             self.keypass = entry
             self.keypass.set_visibility(False)
@@ -433,11 +436,16 @@ class ourwindow(Gtk.Window):
         self.add_filters(dialog)
 
         response = dialog.run()
+        """
+        By default, Gtk.FileChooser only allows a single file to be selected at a time. 
+        To enable multiple files to be selected, use Gtk.FileChooser.set_select_multiple(). 
+        Retrieving a list of selected files is possible with either Gtk.FileChooser.get_filenames() or Gtk.FileChooser.get_uris().
+        """
         if response == Gtk.ResponseType.OK:
-            print("Open clicked")
-            print("File selected: " + dialog.get_filename())
-            self.capath.set_text(dialog.get_filename())
-
+            files = dialog.get_filenames()
+            for i in files:
+                print "File(s) selected", i
+                
             """
             Sign the choosed request.
             """
@@ -457,7 +465,7 @@ class ourwindow(Gtk.Window):
         filter_ca = Gtk.FileFilter()
         filter_ca.set_name("ca files")
         filter_ca.add_pattern("*.pem")
-        dialog.add_filter(filter_csr)
+        dialog.add_filter(filter_ca)
 
     def on_folder_clicked(self, widget):
         dialog = Gtk.FileChooserDialog("Please choose a folder", self,
