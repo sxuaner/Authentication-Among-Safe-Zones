@@ -387,12 +387,12 @@ class ourwindow(Gtk.Window):
                    "-keystore", "../keystore",
                    "-keysize", str(self.info["Key Size"]),
                    "-keypass", str(self.info["Key Pass"]),
-                   "-storepass", str(self.info["Store Pass"])
+                   "-storepass", str(self.info["Store Pass"]),
                 ]
-            result = subprocess.Popen(par)
-            result.wait()
-            print result
-            print "Key pair " + self.info["Alias"] + str(i)+ " has been generated."
+            
+            result = subprocess.call(par)
+            if not result:
+                print "Key pair " + self.info["Alias"] + str(i)+ " has been generated." #
 
        
         # Make 5 certs based on alias
@@ -451,7 +451,12 @@ class ourwindow(Gtk.Window):
     def add_filters(self, dialog):
         filter_csr = Gtk.FileFilter()
         filter_csr.set_name("csr files")
-        filter_csr.add_pattern("*.csr")
+        filter_csr.add_pattern("*.pem")
+        dialog.add_filter(filter_csr)
+
+        filter_ca = Gtk.FileFilter()
+        filter_ca.set_name("ca files")
+        filter_ca.add_pattern("*.pem")
         dialog.add_filter(filter_csr)
 
     def on_folder_clicked(self, widget):
