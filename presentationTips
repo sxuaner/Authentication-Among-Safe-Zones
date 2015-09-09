@@ -54,7 +54,11 @@ Certificate fingerprint (SHA1): E3:F3:8F:A8:B6:86:0A:C4:0B:E3:72:09:B1:45:D2:40:
 	http://www.pygtk.org/pygtk2reference/gtk-stock-items.html
 	Needs to be specified in the doc.
 
-	choose a random one in the folder and all will be added.
+	select multiple files and what if the selected file is not a request???
+	check this -----BEGIN NEW CERTIFICATE REQUEST----- and filter the file sufix.
+
+
+	check what is needed to sign the requests.
 
     7. export the certificate.
 
