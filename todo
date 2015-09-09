@@ -19,4 +19,5 @@ chain of trust.
 
 hide the pass
 
-tree view to display selected .pem files.
+tree view to display selected .pem files. display what we have in the project. default ~/.ca-gui/
+2 plans here:, one is for tree view, the other is selection.
