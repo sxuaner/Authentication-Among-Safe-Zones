@@ -430,7 +430,8 @@ class ourwindow(Gtk.Window):
                "-keystore", "../keystore",
                "-storepass", str(self.info["Store Pass"])
         ]
-        subprocess.Popen(par)
+        subprocess.call(par)
+
 
     def on_sign_clicked(self, widget):
         """
@@ -439,8 +440,6 @@ class ourwindow(Gtk.Window):
         """
         print "sign"
         
-
-##################### file selection dialog part ######################
     """
     This is part of the file selection code. Kind of standard. No need to change normally.
     """  
@@ -448,27 +447,20 @@ class ourwindow(Gtk.Window):
     def on_csr_file_clicked(self, widget):
         dialog = Gtk.FileChooserDialog("Please choose a file", self,
                                        Gtk.FileChooserAction.OPEN,
-                                       (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
-                                        Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
+                                       ("Cancel", Gtk.ResponseType.CANCEL,
+                                        "Open", Gtk.ResponseType.OK))
         dialog.set_select_multiple(True)
         self.add_filters(dialog)
-
         response = dialog.run()
         """
         By default, Gtk.FileChooser only allows a single file to be selected at a time. 
         To enable multiple files to be selected, use Gtk.FileChooser.set_select_multiple(). 
-        Retrieving a list of selected files is possible with either Gtk.FileChooser.get_filenames() or Gtk.FileChooser.get_uris().
+        Retrieving a list of selected files is possible with either Gtk.FileChooser.get_filenames()or Gtk.FileChooser.get_uris().
         """
         if response == Gtk.ResponseType.OK:
-            files = dialog.get_filenames()
-            for i in files:
+            self.files = dialog.get_filenames()
+            for i in self.files:
                 print "File(s) selected", i
-                
-            """
-            Sign the choosed request.
-            """
-
-            
         elif response == Gtk.ResponseType.CANCEL:
             print("Cancel clicked")
         dialog.destroy()
