@@ -161,11 +161,11 @@ class ourwindow(Gtk.Window):
         signingBox.pack_start(hbox, True, True, 0)
 
         button = Gtk.Button("Select Ca")
-        button.connect("clicked", self.on_csr_file_clicked)
+        button.connect("clicked", self.on_ca_config_clicked)
         hbox.pack_start(button, True, True, 0)
 
-        button = Gtk.Button("Sign Req")
-        button.connect("clicked", self.on_sign_clicked)
+        button = Gtk.Button("Select CSR")
+        button.connect("clicked", self.on_csr_file_clicked)
         hbox.pack_start(button, True, True, 0)
    
 
@@ -405,38 +405,70 @@ class ourwindow(Gtk.Window):
         ]
         subprocess.call(par)
 
+############################# Group methods according to box's name #######################
 
-    def on_sign_clicked(self, widget):
-        """
-        This methods is called when button " Sign Req " is pressed.
-        Defined makeSigningBox().
-        """
-        
-    """
-    This is part of the file selection code. Kind of standard. No need to change normally.
-    """  
-
-    def on_csr_file_clicked(self, widget):
-        dialog = Gtk.FileChooserDialog("Please choose a file", self,
+    def on_ca_config_clicked(self,widge):
+        dialog = Gtk.FileChooserDialog("Please choose ca's config file", self,
                                        Gtk.FileChooserAction.OPEN,
                                        ("Cancel", Gtk.ResponseType.CANCEL,
                                         "Open", Gtk.ResponseType.OK))
-        dialog.set_select_multiple(True)
         self.add_filters(dialog)
         response = dialog.run()
+        if response == Gtk.ResponseType.OK:
+            self.CAConfig = dialog.get_filename()
+            print "CA config selected", self.CAConfig
+        elif response == Gtk.ResponseType.CANCEL:
+            print("Cancel clicked")
+        dialog.destroy()
+        
+    def on_csr_file_clicked(self, widget):
         """
         By default, Gtk.FileChooser only allows a single file to be selected at a time. 
         To enable multiple files to be selected, use Gtk.FileChooser.set_select_multiple(). 
         Retrieving a list of selected files is possible with either Gtk.FileChooser.get_filenames()or Gtk.FileChooser.get_uris().
         """
+        dialog = Gtk.FileChooserDialog("Please choose a certificate request file", self,
+                                       Gtk.FileChooserAction.OPEN,
+                                       ("Cancel", Gtk.ResponseType.CANCEL,
+                                        "Open", Gtk.ResponseType.OK))
+        dialog.set_select_multiple(True)
+        self.add_filters(dialog)
+
+        response = dialog.run()
         if response == Gtk.ResponseType.OK:
-            self.files = dialog.get_filenames()
-            for i in self.files:
-                print "File(s) selected", i
+            self.csr = dialog.get_filenames()
+            for i in self.csr:
+                print "File selected", i
         elif response == Gtk.ResponseType.CANCEL:
             print("Cancel clicked")
+
         dialog.destroy()
 
+
+        # grid = Gtk.Grid()
+        # grid.set_column_homogeneous(True)
+        # grid.set_row_homogeneous(True)
+        # # creating a list store
+        # csr_liststore = Gtk.ListStore(str)
+        # # Import all the selected csr files into list store.
+        # for i in self.csr:
+        #     software_liststore.append(i)
+
+        # treeview = Gtk.TreeView(csr_liststore)
+        # renderer = Gtk.CellRendererText()
+        # column = Gtk.TreeViewColumn("CSR File", renderer, text = "CSR File")
+        # treeview.append_column(column)
+        #         #setting up the layout, putting the treeview in a scrollwindow, and the buttons in a row
+        # scrollable_treelist = Gtk.ScrolledWindow()
+        # scrollable_treelist.set_vexpand(True)
+        # grid.attach(self.scrollable_treelist, 0, 0, 8, 10)
+        # grid.attach_next_to(self.buttons[0], self.scrollable_treelist, Gtk.PositionType.BOTTOM, 1, 1)
+        # for i, button in enumerate(self.buttons[1:]):
+        #     self.grid.attach_next_to(button, self.buttons[i], Gtk.PositionType.RIGHT, 1, 1)
+        # self.scrollable_treelist.add(self.treeview)
+
+        # self.show_all()
+        
     def add_filters(self, dialog):
         filter_csr = Gtk.FileFilter()
         filter_csr.set_name("csr files")
@@ -448,6 +480,12 @@ class ourwindow(Gtk.Window):
         filter_ca.add_pattern("*.pem")
         dialog.add_filter(filter_ca)
 
+        
+        filter_conf = Gtk.FileFilter()
+        filter_conf.set_name("config files")
+        filter_conf.add_pattern("*.conf")
+        dialog.add_filter(filter_conf)
+        
     def on_folder_clicked(self, widget):
         dialog = Gtk.FileChooserDialog("Please choose a folder", self,
             Gtk.FileChooserAction.SELECT_FOLDER,
