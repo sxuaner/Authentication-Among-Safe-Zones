@@ -5,10 +5,14 @@ from gi.repository import Gtk
 import subprocess
 import os.path
 
-# Change the default admin keyword here.
-STOREKEYWORD = "keystoreadmin"
+# Change the default admin password here.
+STOREPASSWORD = "keystoreadmin"
+CSRPATH = "clientCerts/csr/"
+
+CERTPATH = "clientCerts/cert/"
 
 
+KEYSTOREPATH = "keystore"
 class ourwindow(Gtk.Window):
 
     def __init__(self):
@@ -25,6 +29,16 @@ class ourwindow(Gtk.Window):
         self.info = dict()
         # list for storing names of users
         self.names = []
+
+        self.popup = Gtk.Window()
+        self.popup.set_title("CSR File selected")
+        self.popup.set_border_width(10)
+        self.popup.set_default_size(600,400)
+        self.popup.set_modal(False)
+        self.grid = Gtk.Grid()
+        self.grid.set_column_homogeneous(True)
+        self.grid.set_row_homogeneous(True)
+        self.popup.add(self.grid)
 
     def createFields(self, name):
         """
@@ -65,7 +79,7 @@ class ourwindow(Gtk.Window):
         if name == "Store Pass":
             self.storepass = entry
             self.storepass.set_visibility(False)
-            self.storepass.set_text(STOREKEYWORD)
+            self.storepass.set_text(STOREPASSWORD)
         if name == "CA's Path":
             self.capath = entry
             
@@ -167,7 +181,10 @@ class ourwindow(Gtk.Window):
         button = Gtk.Button("Select CSR")
         button.connect("clicked", self.on_csr_file_clicked)
         hbox.pack_start(button, True, True, 0)
-   
+
+        button = Gtk.Button("Sign")
+        button.connect("clicked", self.on_sign_clicked)
+        signingBox.pack_start(button, True, True, 0)
 
     def makeShowBox(self, showBox):
         """
@@ -308,7 +325,7 @@ class ourwindow(Gtk.Window):
                        "-genkeypair",
                        "-alias", str( self.info["Alias"]),
                        "-dname", str("CN=" + self.info["Common Name"]),
-                       "-keystore", "../keystore",
+                       "-keystore", KEYSTOREPATH,
                        "-keysize", str(self.info["Key Size"]),
                        "-keypass", str(self.info["Key Pass"]),
                        "-storepass", str(self.info["Store Pass"])
@@ -325,9 +342,9 @@ class ourwindow(Gtk.Window):
         self.updateEntries()
 
         # Make sure folder ./clientCerts exist.
-        if not os.path.exists("../clientCerts"):
+        if not os.path.exists(CSRPATH):
             par = ["mkdir",
-                   "-p", "../clientCerts"
+                   "-p", CSRPATH
             ]
             subprocess.call(par)
 
@@ -341,8 +358,8 @@ class ourwindow(Gtk.Window):
         par = ["/bin/keytool",
                "-certreq",
                "-alias", str( self.info["Alias"]),
-               "-file", str( "../clientCerts/"+ self.info["Common Name"]+".pem"),
-               "-keystore", "../keystore",
+               "-file", str( CSRPATH+ self.info["Alias"]+".pem"),
+               "-keystore", KEYSTOREPATH,
                "-storepass", str(self.info["Store Pass"]),
                "-keypass", self.info["Key Pass"]
         ]
@@ -354,9 +371,9 @@ class ourwindow(Gtk.Window):
         self.updateEntries()
 
         # To make sure the dir exists
-        if not os.path.exists("../clientCerts"):
+        if not os.path.exists(CSRPATH):
             par = ["mkdir",
-                   "-p", "../clientCerts"
+                   "-p", CSRPATH
             ]
             result = subprocess.Popen(par)
             result.wait()
@@ -370,7 +387,7 @@ class ourwindow(Gtk.Window):
                    "-genkeypair",
                    "-alias", str( self.info["Alias"] + str(i)),
                    "-dname", str("CN=" + self.info["Common Name"]),  # They share common CN
-                   "-keystore", "../keystore",
+                   "-keystore", KEYSTOREPATH,
                    "-keysize", str(self.info["Key Size"]),
                    "-keypass", str(self.info["Key Pass"]),
                    "-storepass", str(self.info["Store Pass"]),
@@ -386,8 +403,8 @@ class ourwindow(Gtk.Window):
             par = ["/bin/keytool",
                    "-certreq",
                    "-alias", str( self.info["Alias"] + str(j)),
-                   "-file", str( "../clientCerts/" + self.info["Alias"]+ str(j) + ".pem"),
-                   "-keystore", "../keystore",
+                   "-file", str( CSRPATH + self.info["Alias"]+ str(j) + ".pem"),
+                   "-keystore", KEYSTOREPATH,
                    "-storepass", str(self.info["Store Pass"]),
                    "-keypass", self.info["Key Pass"]
             ]
@@ -400,7 +417,7 @@ class ourwindow(Gtk.Window):
         # @par -keystore: where to find target keystore, followed by the path.
         par = ["/bin/keytool",
                "-list",
-               "-keystore", "../keystore",
+               "-keystore", KEYSTOREPATH,
                "-storepass", str(self.info["Store Pass"])
         ]
         subprocess.call(par)
@@ -417,8 +434,9 @@ class ourwindow(Gtk.Window):
         if response == Gtk.ResponseType.OK:
             self.CAConfig = dialog.get_filename()
             print "CA config selected", self.CAConfig
+            self.capath.set_text(self.CAConfig)
         elif response == Gtk.ResponseType.CANCEL:
-            print("Cancel clicked")
+            print("Dialog Canceled")
         dialog.destroy()
         
     def on_csr_file_clicked(self, widget):
@@ -437,45 +455,64 @@ class ourwindow(Gtk.Window):
         response = dialog.run()
         if response == Gtk.ResponseType.OK:
             self.csr = dialog.get_filenames()
-            for i in self.csr:
-                print "File selected", i
+            if hasattr(self, "csr"):
+                for i in self.csr:
+                    print "File selected", i
+  
+                    csr_liststore = Gtk.ListStore(str)         # creating a list store
+
+                    for i in self.csr:        # Import all the selected csr files into list store.
+                         i = [i,]
+                         csr_liststore.append(i)
+
+                    treeview = Gtk.TreeView(csr_liststore)            # Creating a treeview
+                    renderer = Gtk.CellRendererText()
+                    for i, colname in enumerate(["CSR File"]):
+                        column = Gtk.TreeViewColumn(colname, renderer, text = i)
+                        treeview.append_column(column)
+                        column.set_sort_column_id(0)
+                    
+                    scrollable_treelist = Gtk.ScrolledWindow()             #setting up the layout, putting the treeview in a scrollwindow, and the buttons in a row
+                    scrollable_treelist.set_vexpand(True)
+                    self.grid.attach(scrollable_treelist, 0, 0, 8, 10)
+                    scrollable_treelist.add(treeview)
+
+            self.popup.show_all()
+
         elif response == Gtk.ResponseType.CANCEL:
-            print("Cancel clicked")
+            print("Cancel")
         
         dialog.destroy()
 
         # After the selection of csr files, we pop up a window to display.
-        popup = Gtk.Window()
-        popup.set_title("CSR File selected")
-        popup.set_border_width(10)
-        popup.set_default_size(600,400)
-        popup.set_modal(False)
-        grid = Gtk.Grid()
-        grid.set_column_homogeneous(True)
-        grid.set_row_homogeneous(True)
-        popup.add(grid)
 
-        # creating a list store
-        csr_liststore = Gtk.ListStore(str)
-
-        # Import all the selected csr files into list store.
-        for i in self.csr:
-            i = [i,]
-            csr_liststore.append(i)
-        # Creating a treeview
-        treeview = Gtk.TreeView(csr_liststore)
-        renderer = Gtk.CellRendererText()
-        for i, colname in enumerate(["CSR File"]):
-            column = Gtk.TreeViewColumn(colname, renderer, text = i)
-        treeview.append_column(column)
-        #setting up the layout, putting the treeview in a scrollwindow, and the buttons in a row
-        scrollable_treelist = Gtk.ScrolledWindow()
-        scrollable_treelist.set_vexpand(True)
-        grid.attach(scrollable_treelist, 0, 0, 8, 10)
-
-        scrollable_treelist.add(treeview)
-
-        popup.show_all()
+    def on_sign_clicked(self,button):
+        # To make sure the dir exists
+        if not os.path.exists(CERTPATH):
+            par = ["mkdir",
+                   "-p", CERTPATH
+            ]
+            subprocess.call(par)
+            
+        if hasattr(self,"csr"):
+            if hasattr(self, "CAConfig"):
+                for i in self.csr:
+                    par = ["/bin/openssl",
+                           "ca",
+                           "-config", str( self.CAConfig),
+                           "-in", str(i),
+                           "-out", CERTPATH + os.path.basename(i),
+                           "-extensions", "server_ext"
+                    ]
+                    result = subprocess.call(par)
+                    print result
+                    if not result:
+                        print "All requestions have been signed"
+            else:
+                print "CAConfig is missing."
+        else:
+            print "CSR files are not choosen yet."
+                
         
     def add_filters(self, dialog):
         filter_csr = Gtk.FileFilter()
@@ -483,12 +520,6 @@ class ourwindow(Gtk.Window):
         filter_csr.add_pattern("*.pem")
         dialog.add_filter(filter_csr)
 
-        filter_ca = Gtk.FileFilter()
-        filter_ca.set_name("ca files")
-        filter_ca.add_pattern("*.pem")
-        dialog.add_filter(filter_ca)
-
-        
         filter_conf = Gtk.FileFilter()
         filter_conf.set_name("config files")
         filter_conf.add_pattern("*.conf")
