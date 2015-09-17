@@ -58,3 +58,10 @@ Certificate fingerprint (SHA1): E3:F3:8F:A8:B6:86:0A:C4:0B:E3:72:09:B1:45:D2:40:
 
 
 11. Add comments before methods and explain where these methods are used.
+
+12. can be sorted in selection
+
+13. hard to maintain.
+14. file choose error protection.
+
+15. retrieve the content in keystore and display it in a nicer format
