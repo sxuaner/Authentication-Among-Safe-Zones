@@ -65,3 +65,7 @@ Certificate fingerprint (SHA1): E3:F3:8F:A8:B6:86:0A:C4:0B:E3:72:09:B1:45:D2:40:
 14. file choose error protection.
 
 15. retrieve the content in keystore and display it in a nicer format
+
+
+16.
+keytool can import X.509 v1, v2, and v3 certificates, and PKCS#7 formatted certificate chains consisting of certificates of that type. The data to be imported must be provided either in binary encoding format, or in printable encoding format (also known as Base64 encoding) as defined by the Internet RFC 1421 standard. In the latter case, the encoding must be bounded at the beginning by a string that starts with "-----BEGIN", and bounded at the end by a string that starts with "-----END". 

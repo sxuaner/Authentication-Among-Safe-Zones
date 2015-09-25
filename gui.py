@@ -13,6 +13,8 @@ CERTPATH = "clientCerts/cert/"
 
 
 KEYSTOREPATH = "keystore"
+
+
 class ourwindow(Gtk.Window):
 
     def __init__(self):
@@ -188,14 +190,28 @@ class ourwindow(Gtk.Window):
 
     def makeShowBox(self, showBox):
         """
+        Make a box that contains only a button.
+        """
+        hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        showBox.pack_start(hbox, True, True, 0)
+
+        button = Gtk.Button("Display Cert")
+        button.connect("clicked", self.on_click_show_clicked)
+        hbox.pack_start(button, True, True, 0)
+
+    def makeImportBox(self, showBox):
+        """
         Refer to make SigningBox
         """
         hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         showBox.pack_start(hbox, True, True, 0)
 
-        button = Gtk.Button("Show Cert")
-        button.connect("clicked", self.on_click_show_clicked)
+        button = Gtk.Button("Import Cert")
+        button.connect("clicked", self.on_click_import_clicked)
         hbox.pack_start(button, True, True, 0)
+
+        
+        
         
     def layout(self):
         """
@@ -205,9 +221,10 @@ class ourwindow(Gtk.Window):
         1: keystoreBox, used to create a keystore and keypairs
         2: signingBox : used to sign cert and concatenate certs as a trust-chain.
         3: clientCertBox, used to make client certificates.
-        4: showBox, used to show the content of a given keystore/cert by selecting.
-
+        4: importBox, to import trusted certificate.
+        5: showBox, used to show the content of a given keystore/cert by selecting.
         Here is how we pack all the boxes:
+
         Top level is a vertical box. We pack each of above boxes into the vertical box.
         
         It should look like this in the end:
@@ -219,6 +236,8 @@ class ourwindow(Gtk.Window):
         | 3 |
         |---|
         | 4 |
+        |---|
+        | 5 |
         -----
 
         For each box, We also need a label to indicate the purpose.
@@ -241,10 +260,12 @@ class ourwindow(Gtk.Window):
         clientCertBox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
         signingBox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
         showBox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        importBox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
 
         # Call functions to construct all those boxes.
         self.makeKeystoreBox(keystoreBox)
         self.makeSigningBox(signingBox)
+        self.makeImportBox(importBox)
         self.makeShowBox(showBox)
 
         """
@@ -276,14 +297,18 @@ class ourwindow(Gtk.Window):
         label = Gtk.Label("Signing", width_chars = 40)
         VerticalBox.pack_start(label, True, True, 0)
         VerticalBox.pack_start(signingBox, True, True, 0)
-        hsep3 = Gtk.HSeparator()
-        VerticalBox.pack_start(hsep3, True, True, 0)
+        hsep2 = Gtk.HSeparator()
+        VerticalBox.pack_start(hsep2, True, True, 0)
         
         # showBox
-        label = Gtk.Label("Display", width_chars = 40 )
+        label = Gtk.Label("Miscellaneous", width_chars = 40 )
         VerticalBox.pack_start(label, True, True, 0)
         VerticalBox.pack_start(showBox, True, True, 0)
+        hsep3 = Gtk.HSeparator()
 
+        # Import box
+        VerticalBox.pack_start(importBox, True, True, 0)
+        
         self.box.pack_start(VerticalBox, True, True, 0)
 
 
@@ -422,6 +447,36 @@ class ourwindow(Gtk.Window):
         ]
         subprocess.call(par)
 
+
+
+    def on_click_import_clicked(self, button):
+        self.updateEntries();
+        dialog = Gtk.FileChooserDialog("Please choose ca's config file", self,
+                                       Gtk.FileChooserAction.OPEN,
+                                       ("Cancel", Gtk.ResponseType.CANCEL,
+                                        "Open", Gtk.ResponseType.OK))
+        self.add_filters(dialog)
+        response = dialog.run()
+        if response == Gtk.ResponseType.OK:
+            certToBeImported = dialog.get_filename()
+            print "CA config selected", certToBeImported
+        elif response == Gtk.ResponseType.CANCEL:
+            print("Dialog Canceled")
+        dialog.destroy()
+
+        # @par -list: argument to list the content of a keystore
+        # @par -keystore: where to find target keystore, followed by the path.
+        par = ["/bin/keytool",
+               "-import",
+               "-alias", str(self.info["Alias"]),
+               "-keystore", KEYSTOREPATH,
+               "-storepass", str(self.info["Store Pass"]),
+               "-file", certToBeImported
+        ]
+        subprocess.call(par)
+
+        
+
 ############################# Group methods according to box's name #######################
 
     def on_ca_config_clicked(self,widge):
@@ -523,6 +578,11 @@ class ourwindow(Gtk.Window):
         filter_conf = Gtk.FileFilter()
         filter_conf.set_name("config files")
         filter_conf.add_pattern("*.conf")
+        dialog.add_filter(filter_conf)
+
+        filter_conf = Gtk.FileFilter()
+        filter_conf.set_name("All files")
+        filter_conf.add_pattern("*")
         dialog.add_filter(filter_conf)
         
     def on_folder_clicked(self, widget):
