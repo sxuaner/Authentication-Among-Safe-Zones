@@ -68,4 +68,19 @@ Certificate fingerprint (SHA1): E3:F3:8F:A8:B6:86:0A:C4:0B:E3:72:09:B1:45:D2:40:
 
 
 16.
-keytool can import X.509 v1, v2, and v3 certificates, and PKCS#7 formatted certificate chains consisting of certificates of that type. The data to be imported must be provided either in binary encoding format, or in printable encoding format (also known as Base64 encoding) as defined by the Internet RFC 1421 standard. In the latter case, the encoding must be bounded at the beginning by a string that starts with "-----BEGIN", and bounded at the end by a string that starts with "-----END". 
+keytool can import X.509 v1, v2, and v3 certificates, and PKCS#7 formatted certificate chains consisting of certificates of that type. The data to be imported must be provided either in binary encoding format, or in printable encoding format (also known as Base64 encoding) as defined by the Internet RFC 1421 standard. In the latter case, the encoding must be bounded at the beginning by a string that starts with "-----BEGIN", and bounded at the end by a string that starts with "-----END".
+
+
+17 Valid duration not implemented.
+
+
+18.  The X.509 standard defines what information can go into a certificate, and describes how to write it down (the data format) .
+
+19.
+Most commands operating on a keystore require the store password. Some commands require a private/secret key password.
+
+Passwords can be specified on the command line (in the -storepass and -keypass options, respectively). However, a password should not be specified on a command line or in a script unless it is for testing purposes, or you are on a secure system.
+
+
+
+20 database commands not implemented.

@@ -137,7 +137,7 @@ class ourwindow(Gtk.Window):
         keystoreBox.pack_start(label,True,True,0)
         self.packHboxToVbox(keystoreBox, "Alias")
         self.packHboxToVbox(keystoreBox, "Common Name")
- 
+        self.packHboxToVbox(keystoreBox, "Org Name")
         self.packHboxToVbox(keystoreBox, "Key Pass")
 
         label = Gtk.Label("Optional", width_chars = 15 )
@@ -156,7 +156,7 @@ class ourwindow(Gtk.Window):
         hbox.pack_start(button, True, True, 0 )
         keystoreBox.pack_start(hbox, True, True, 0)
 
-        button = Gtk.Button("One Req")
+        button = Gtk.Button("A Request")
         button.connect("clicked", self.on_click_reqbutton_clicked)
         keystoreBox.pack_start(button, True, True, 0)
 
@@ -195,7 +195,7 @@ class ourwindow(Gtk.Window):
         hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         showBox.pack_start(hbox, True, True, 0)
 
-        button = Gtk.Button("Display Cert")
+        button = Gtk.Button("Display Entries in Keystore")
         button.connect("clicked", self.on_click_show_clicked)
         hbox.pack_start(button, True, True, 0)
 
@@ -210,8 +210,14 @@ class ourwindow(Gtk.Window):
         button.connect("clicked", self.on_click_import_clicked)
         hbox.pack_start(button, True, True, 0)
 
-        
-        
+    def makeShowCertBox(self, showBox):
+        hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        showBox.pack_start(hbox, True, True, 0)
+
+        button = Gtk.Button("Cert Content")
+        button.connect("clicked", self.on_click_show_cert_clicked)
+        hbox.pack_start(button, True, True, 0)
+
         
     def layout(self):
         """
@@ -267,6 +273,7 @@ class ourwindow(Gtk.Window):
         self.makeSigningBox(signingBox)
         self.makeImportBox(importBox)
         self.makeShowBox(showBox)
+        self.makeShowCertBox(showBox)
 
         """
         Start packing Keystore box. 
@@ -440,14 +447,21 @@ class ourwindow(Gtk.Window):
 
         # @par -list: argument to list the content of a keystore
         # @par -keystore: where to find target keystore, followed by the path.
-        par = ["/bin/keytool",
-               "-list",
-               "-keystore", KEYSTOREPATH,
-               "-storepass", str(self.info["Store Pass"])
-        ]
-        subprocess.call(par)
-
-
+        if self.info["Alias"]:
+            par = ["/bin/keytool",
+                   "-list",
+                   "-keystore", KEYSTOREPATH,
+                   "-storepass", str(self.info["Store Pass"]),
+                   "-alias", self.info["Alias"]
+            ]
+            subprocess.call(par)
+        else:
+            par = ["/bin/keytool",
+                   "-list",
+                   "-keystore", KEYSTOREPATH,
+                   "-storepass", str(self.info["Store Pass"]),
+            ]
+            subprocess.call(par)
 
     def on_click_import_clicked(self, button):
         self.updateEntries();
@@ -466,18 +480,23 @@ class ourwindow(Gtk.Window):
 
         # @par -list: argument to list the content of a keystore
         # @par -keystore: where to find target keystore, followed by the path.
-        par = ["/bin/keytool",
-               "-import",
-               "-alias", str(self.info["Alias"]),
-               "-keystore", KEYSTOREPATH,
-               "-storepass", str(self.info["Store Pass"]),
-               "-file", certToBeImported
-        ]
-        subprocess.call(par)
-
-        
-
-############################# Group methods according to box's name #######################
+        if self.info["Alias"]:
+            if self.info["Store Pass"]:
+                if certToBeImported:
+                    par = ["/bin/keytool",
+                           "-import",
+                           "-alias", str(self.info["Alias"]),
+                           "-keystore", KEYSTOREPATH,
+                           "-storepass", str(self.info["Store Pass"]),
+                           "-file", certToBeImported
+                    ]
+                    subprocess.call(par)
+                else:
+                    print "Please select a file"
+            else:
+                print "Password to Keystore is not provided"
+        else:
+            print "Alias not specified"
 
     def on_ca_config_clicked(self,widge):
         dialog = Gtk.FileChooserDialog("Please choose ca's config file", self,
@@ -491,7 +510,7 @@ class ourwindow(Gtk.Window):
             print "CA config selected", self.CAConfig
             self.capath.set_text(self.CAConfig)
         elif response == Gtk.ResponseType.CANCEL:
-            print("Dialog Canceled")
+            print("Import Selection Dialog Canceled")
         dialog.destroy()
         
     def on_csr_file_clicked(self, widget):
@@ -556,8 +575,8 @@ class ourwindow(Gtk.Window):
                            "ca",
                            "-config", str( self.CAConfig),
                            "-in", str(i),
-                           "-out", CERTPATH + os.path.basename(i),
-                           "-extensions", "server_ext"
+                           "-out", CERTPATH + os.path.basename(i)
+                        #    "-extensions", "server_ext"
                     ]
                     result = subprocess.call(par)
                     print result
@@ -566,20 +585,45 @@ class ourwindow(Gtk.Window):
             else:
                 print "CAConfig is missing."
         else:
-            print "CSR files are not choosen yet."
-                
+            print "CSR files have not been choosen yet."
+
+    def on_click_show_cert_clicked(self, button):
+        self.updateEntries();
+        dialog = Gtk.FileChooserDialog("Please choose ca's config file", self,
+                                       Gtk.FileChooserAction.OPEN,
+                                       ("Cancel", Gtk.ResponseType.CANCEL,
+                                        "Open", Gtk.ResponseType.OK))
+        self.add_filters(dialog)
+        response = dialog.run()
+        if response == Gtk.ResponseType.OK:
+            certToShow = dialog.get_filename()
+            print "A signed cert selected", certToShow
+        elif response == Gtk.ResponseType.CANCEL:
+            print("Dialog Canceled")
+        dialog.destroy()
+
+        # @par -list: argument to list the content of a keystore
+        # @par -keystore: where to find target keystore, followed by the path.
+        if certToShow:
+            par = ["./utils/showCerts.sh", str(certToShow)]
+            subprocess.call(par)
+        else:
+            print "Select a signed certificate"
+            
+ ##################### ######################                       
         
     def add_filters(self, dialog):
-        filter_csr = Gtk.FileFilter()
-        filter_csr.set_name("csr files")
-        filter_csr.add_pattern("*.pem")
-        dialog.add_filter(filter_csr)
-
         filter_conf = Gtk.FileFilter()
         filter_conf.set_name("config files")
         filter_conf.add_pattern("*.conf")
         dialog.add_filter(filter_conf)
 
+        filter_csr = Gtk.FileFilter()
+        filter_csr.set_name("csr files")
+        filter_csr.add_pattern("*.pem")
+        dialog.add_filter(filter_csr)
+
+  
         filter_conf = Gtk.FileFilter()
         filter_conf.set_name("All files")
         filter_conf.add_pattern("*")
@@ -600,7 +644,7 @@ class ourwindow(Gtk.Window):
             print("Cancel clicked")
         dialog.destroy()
         
-###################### End of file selection window ######################        
+############################################        
     
 if __name__ == "__main__":
     window = ourwindow()
